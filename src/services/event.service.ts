@@ -6,7 +6,7 @@ export const createEvents = (datas: IEvent[]) => {
   });
 };
 
-export const getEvents = ({
+export const getEventsQuery = async ({
   query,
   page,
   limit,
@@ -17,6 +17,22 @@ export const getEvents = ({
   limit: number;
   sort: any;
 }) => {
-    
+  const skip = (page - 1) * limit;
 
+  const results = await Event.find({
+    ...query,
+  })
+    .sort(sort)
+    .skip(skip)
+    .limit(limit);
+
+  const totalCount = await Event.countDocuments();
+
+  return {
+    page,
+    limit,
+    totalPages: Math.ceil(totalCount / limit),
+    totalCount,
+    results,
+  };
 };

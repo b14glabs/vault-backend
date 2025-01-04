@@ -33,7 +33,7 @@ const eventSchema = new Schema(
     // totalAmounts: [String],
   },
   {
-    // timestamps: { createdAt: true, updatedAt: true },
+    timestamps: { createdAt: true, updatedAt: true },
   }
 );
 
