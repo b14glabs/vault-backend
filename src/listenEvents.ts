@@ -5,6 +5,7 @@ import { createEvents } from "./services/event.service";
 import { DualCore } from "./types/dualCore";
 import Web3, { EventLog } from "web3";
 import fs from "fs";
+import { log } from "console";
 
 export async function listenEvents() {
   try {
@@ -19,7 +20,7 @@ export async function listenEvents() {
     try {
       fromBlock = Number(fs.readFileSync("src/log/fromBlock", "utf-8"));
     } catch (error) {
-      console.log(`Error reading file: ${error}`);
+      log(`Error reading file: ${error}`);
     }
 
     fromBlock = Math.min(fromBlock, Number(latestBlock));
@@ -28,7 +29,7 @@ export async function listenEvents() {
       fromBlock = Math.max(toBlock - 9999, 0);
     }
 
-    console.log(`Get event from ${fromBlock} to ${toBlock}`);
+    log(`Get event from ${fromBlock} to ${toBlock}`);
 
     const allEvent = (await contract.getPastEvents("ALLEVENTS", {
       fromBlock: fromBlock,
@@ -71,7 +72,7 @@ export async function listenEvents() {
     await createEvents(eventDocs);
     fs.writeFileSync("src/log/fromBlock", (toBlock + 1).toString());
   } catch (error) {
-    console.error(error);
+    log(error);
   } finally {
     setTimeout(() => {
       listenEvents();

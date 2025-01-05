@@ -4,7 +4,6 @@ export const enumType = ["stake", "withdraw", "rebalance"];
 
 export type EnumType = (typeof enumType)[number];
 
-
 const schemaDefinition = {
   from: {
     type: String,
@@ -26,15 +25,15 @@ const schemaDefinition = {
   sCoreAmount: {
     type: String,
   },
-  // strategies: [String], 
+  // strategies: [String],
   // stakeAmounts: [String],
   // totalAmounts: [String],
-}
+};
 
 const eventSchema = new mongoose.Schema(schemaDefinition, {
-  timestamps: {createdAt: true, updatedAt: true},
-  collection: "all-events"
-})
+  timestamps: { createdAt: true, updatedAt: true },
+  collection: "allEvents",
+});
 
-export const Event = mongoose.model("AllEvent", eventSchema);
+export const Event = mongoose.model("allEvents", eventSchema);
 export type IEvent = InferSchemaType<typeof schemaDefinition>;

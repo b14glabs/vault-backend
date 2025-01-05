@@ -1,0 +1,25 @@
+import mongoose, { InferSchemaType } from "mongoose";
+
+const schemaDefinition = {
+  blockNumber: {
+    type: Number,
+    required: true,
+    unique: true
+  },
+  exchangeRate: {
+    type: Number,
+    required: true,
+  },
+  date: {
+    type: Date,
+    required: true
+  }
+};
+
+const schema = new mongoose.Schema(schemaDefinition, {
+  timestamps: { createdAt: true, updatedAt: true },
+  collection: "exchangeRates",
+});
+
+export const ExchangeRate = mongoose.model("exchangeRates", schema);
+export type IExchangeRate = InferSchemaType<typeof schemaDefinition>;

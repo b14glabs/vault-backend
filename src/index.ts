@@ -7,6 +7,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import morgan from "morgan";
 import { log } from "console";
+import { listenExchangeRate } from "./listenExchangeRate";
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -27,7 +28,8 @@ async function main() {
     log(`[server]: Server is running at http://localhost:${port}`);
   });
 
-  // listenEvents();
+  listenEvents();
+  listenExchangeRate()
 }
 
 main();

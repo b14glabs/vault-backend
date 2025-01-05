@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getEvents } from "../controller/vault.controller";
+import { getDailyApy, getEvents } from "../controller/vault.controller";
 
 
 const router = Router()
@@ -7,5 +7,6 @@ const router = Router()
 
 
 router.get("/history", getEvents)
+router.get("/daily-apy", getDailyApy)
 
 export default router
