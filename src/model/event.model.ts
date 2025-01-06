@@ -1,9 +1,5 @@
 import mongoose, { InferSchemaType } from "mongoose";
 
-export const enumType = ["stake", "withdraw", "rebalance", "unbond"];
-
-export type EnumType = (typeof enumType)[number];
-
 const schemaDefinition = {
   from: {
     type: String,
@@ -12,7 +8,6 @@ const schemaDefinition = {
   type: {
     type: String,
     required: true,
-    enum: enumType,
   },
   txId: {
     type: String,
@@ -25,9 +20,6 @@ const schemaDefinition = {
   sCoreAmount: {
     type: String,
   },
-  // strategies: [String],
-  // stakeAmounts: [String],
-  // totalAmounts: [String],
 };
 
 const eventSchema = new mongoose.Schema(schemaDefinition, {

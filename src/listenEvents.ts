@@ -1,12 +1,13 @@
-
-import coreVaultAbi from "./abi/core-vault.json"
+import coreVaultAbi from "./abi/core-vault.json";
 import { contractAddresses, jsonRpc, RPC_URL } from "./consts";
-import { EnumType, IEvent } from "./model/event.model";
+import { IEvent } from "./model/event.model";
 import { createEvents } from "./services/event.service";
-
+import { AbiCoder } from "ethers";
 import Web3, { EventLog } from "web3";
 import fs from "fs";
 import { log } from "console";
+
+const abiCoder = new AbiCoder();
 
 export async function listenEvents() {
   try {
@@ -40,37 +41,45 @@ export async function listenEvents() {
     const eventDocs: IEvent[] = [];
 
     for (const event of allEvent) {
-      console.log(event.event)
-      if (["Rebalance", "Stake", "Withdraw", "Unbond"].includes(event.event)) {
-        const type = event.event.toLowerCase() as EnumType;
-        const {
-          coreAmount: eventCoreAmount,
-          sCoreAmount,
-          stakeAmounts,
-          strategies,
-          totalAmounts,
-        } = event.returnValues as {
-          coreAmount: bigint;
-          sCoreAmount: bigint;
-          strategies: string[];
-          stakeAmounts: bigint[];
-          totalAmounts: bigint[];
-        };
-        let coreAmount = eventCoreAmount
-          ? eventCoreAmount
-          : stakeAmounts.reduce((prev, cur) => cur + prev, BigInt(0));
-        const doc = {
-          type,
-          txId: event.transactionHash as string,
-          from: event.address,
-          coreAmount: coreAmount.toString(),
-          strategies,
-          sCoreAmount: sCoreAmount ? sCoreAmount.toString() : undefined,
-        };
+      const type = event.event.toLowerCase();
+
+      const doc: {
+        type: string;
+        txId: string;
+        from: string;
+        coreAmount?: string;
+        sCoreAmount?: string;
+      } = {
+        type,
+        txId: event.transactionHash as string,
+        from: event.address,
+      };
+      if ("ReInvest" === event.event) {
+        const { data } = event.returnValues;
+        const totalAmount = abiCoder.decode(
+          ["bytes", "uint256"],
+          data as any
+        )[1];
+        doc.coreAmount = totalAmount.toString();
+        eventDocs.push(doc);
+      } else if (["Stake", "WithdrawDirect", "Unbond"].includes(event.event)) {
+        const { coreAmount: eventCoreAmount, sCoreAmount } =
+          event.returnValues as {
+            coreAmount: bigint;
+            sCoreAmount: bigint;
+          };
+        doc.coreAmount = eventCoreAmount.toString();
+        eventDocs.push(doc);
+      } else if ("Withdraw" === event.event) {
+        const { amount } = event.returnValues;
+        doc.coreAmount = amount.toString();
+        eventDocs.push(doc);
+      } else if ("ClaimReward" === event.event) {
+        const { reward } = event.returnValues;
+        doc.coreAmount = reward.toString();
         eventDocs.push(doc);
       }
     }
-
     try {
       await createEvents(eventDocs);
     } catch (error) {
