@@ -131,7 +131,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "reInvestIndex",
+        "name": "unlockTime",
         "type": "uint256"
       }
     ],
@@ -177,6 +177,12 @@
         "indexed": false,
         "internalType": "uint256",
         "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "strategyAmount",
         "type": "uint256"
       }
     ],
@@ -289,6 +295,66 @@
     "inputs": [
       {
         "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getUnbondAmount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "unlockedAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "lockedAmount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getUnbondRecords",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "coreAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "dualCoreAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "unlockTime",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct CoreVault.UnbondRecord[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "_owner",
         "type": "address"
       },
@@ -305,6 +371,11 @@
       {
         "internalType": "uint256",
         "name": "_rewardFee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_unlockPeriod",
         "type": "uint256"
       }
     ],
@@ -381,26 +452,13 @@
       },
       {
         "internalType": "uint256",
-        "name": "_totalUnbondAmount",
+        "name": "_roundUnbondAmount",
         "type": "uint256"
       }
     ],
     "name": "reInvest",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "reInvestIndex",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -413,6 +471,19 @@
   {
     "inputs": [],
     "name": "rewardFee",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "roundUnbondAmount",
     "outputs": [
       {
         "internalType": "uint256",
@@ -471,6 +542,19 @@
       }
     ],
     "name": "setStrategy",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_unlockPeriod",
+        "type": "uint256"
+      }
+    ],
+    "name": "setUnlockPeriod",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -592,7 +676,20 @@
       },
       {
         "internalType": "uint256",
-        "name": "reInvestIndex",
+        "name": "unlockTime",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "unlockPeriod",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
         "type": "uint256"
       }
     ],

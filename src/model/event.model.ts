@@ -1,6 +1,6 @@
 import mongoose, { InferSchemaType } from "mongoose";
 
-export const enumType = ["stake", "withdraw", "rebalance"];
+export const enumType = ["stake", "withdraw", "rebalance", "unbond"];
 
 export type EnumType = (typeof enumType)[number];
 

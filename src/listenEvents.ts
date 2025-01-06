@@ -40,7 +40,8 @@ export async function listenEvents() {
     const eventDocs: IEvent[] = [];
 
     for (const event of allEvent) {
-      if (["Rebalance", "Stake", "Withdraw"].includes(event.event)) {
+      console.log(event.event)
+      if (["Rebalance", "Stake", "Withdraw", "Unbond"].includes(event.event)) {
         const type = event.event.toLowerCase() as EnumType;
         const {
           coreAmount: eventCoreAmount,
@@ -70,13 +71,17 @@ export async function listenEvents() {
       }
     }
 
-    await createEvents(eventDocs);
+    try {
+      await createEvents(eventDocs);
+    } catch (error) {
+      // console
+    }
     fs.writeFileSync("src/log/fromBlock", (toBlock + 1).toString());
   } catch (error) {
     log(error);
   } finally {
     setTimeout(() => {
       listenEvents();
-    }, 1000);
+    }, 3000);
   }
 }
