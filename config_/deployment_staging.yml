@@ -1,0 +1,120 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: vault-be-staging-pv
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: general-storage-class
+  local:
+    path: /data/vault-be-staging
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: persistent_data
+              operator: In
+              values:
+                - all
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: vault-be-staging-pvc
+spec:
+  storageClassName: general-storage-class
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vault-be-staging
+  labels:
+    app: vault-be-staging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vault-be-staging
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: vault-be-staging
+    spec:
+      containers:
+        - name: vault-be-staging
+          image: easyprompt2023/vault-be-staging:latest
+          command: ['node']
+          args: ['dist/index.js']
+          imagePullPolicy: Always
+          env:
+            - name: MONGO_URL
+              valueFrom:
+                secretKeyRef:
+                  name: vault-be-staging
+                  key: MONGO_URL
+            - name: RPC_URL
+              valueFrom:
+                secretKeyRef:
+                  name: vault-be-staging
+                  key: RPC_URL
+            - name: DUAL_CORE_ADDRESS
+              valueFrom:
+                secretKeyRef:
+                  name: vault-be-staging
+                  key: DUAL_CORE_ADDRESS
+          volumeMounts:
+            - mountPath: '/home/node/app/src/log'
+              name: vault-be-staging-volumes
+      imagePullSecrets:
+        - name: cred-docker-hub
+      volumes:
+        - name: vault-be-staging-volumes
+          persistentVolumeClaim:
+            claimName: vault-be-staging-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vault-be-staging
+spec:
+  ports:
+    - name: http
+      port: 3002
+      targetPort: 3002
+  selector:
+    app: vault-be-staging
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vault-be-staging-ingress
+
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api-staging.b14g.xyz
+      http:
+        paths:
+          - pathType: Prefix
+            path: '/restake/vault'
+            backend:
+              service:
+                name: vault-be-staging
+                port:
+                  number: 3002
