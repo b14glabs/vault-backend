@@ -41,7 +41,7 @@ export const getDailyApy = async (req: Request, res: Response) => {
       return;
     }
     const data = await findDailyApy();
-
+    console.log("data", data)
     const dailyApy = data.length ? data[0].averageRatio - 1 : 0;
     cache.set(cacheKey, dailyApy, 60);
     res.status(200).json({ dailyApy });

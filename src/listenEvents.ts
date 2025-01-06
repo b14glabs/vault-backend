@@ -1,8 +1,9 @@
-import dualCoreAbi from "./abi/dual-core.json";
+
+import coreVaultAbi from "./abi/core-vault.json"
 import { contractAddresses, jsonRpc, RPC_URL } from "./consts";
 import { EnumType, IEvent } from "./model/event.model";
 import { createEvents } from "./services/event.service";
-import { DualCore } from "./types/dualCore";
+
 import Web3, { EventLog } from "web3";
 import fs from "fs";
 import { log } from "console";
@@ -11,8 +12,8 @@ export async function listenEvents() {
   try {
     const web3 = new Web3(RPC_URL);
     const contract = new web3.eth.Contract(
-      dualCoreAbi,
-      contractAddresses.dualCore
+      coreVaultAbi,
+      contractAddresses.coreVault
     );
     const latestBlock = await web3.eth.getBlockNumber();
     let fromBlock = 0;
