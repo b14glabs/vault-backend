@@ -61,7 +61,7 @@ export const getEventsByUser = async (req: Request, res: Response) => {
 
     const data = await getEventsHistory({
       query: {
-        from: address.toLowerCase(),
+        from: Web3.utils.toChecksumAddress(address),
       },
       page,
       limit,

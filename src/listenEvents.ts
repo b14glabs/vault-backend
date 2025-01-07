@@ -46,13 +46,12 @@ export async function listenEvents() {
       const doc: {
         type: string;
         txId: string;
-        from: string;
+        from?: string;
         coreAmount?: string;
         date: Date
       } = {
         type,
         txId: event.transactionHash as string,
-        from: event.address,
         date: new Date(Number(blockInfo.timestamp) * 1000)
       };
       if ("ReInvest" === event.event) {
@@ -64,11 +63,13 @@ export async function listenEvents() {
         doc.coreAmount = totalAmount.toString();
         eventDocs.push(doc);
       } else if (["Stake", "WithdrawDirect", "Unbond"].includes(event.event)) {
-        const { coreAmount: eventCoreAmount } =
+        const { coreAmount: eventCoreAmount, user } =
           event.returnValues as {
             coreAmount: bigint;
             sCoreAmount: bigint;
+            user: string
           };
+        doc.from = user
         doc.coreAmount = eventCoreAmount.toString();
         eventDocs.push(doc);
       } else if ("Withdraw" === event.event) {

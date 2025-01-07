@@ -3,7 +3,6 @@ import mongoose, { InferSchemaType } from "mongoose";
 const schemaDefinition = {
   from: {
     type: String,
-    required: true,
   },
   type: {
     type: String,
