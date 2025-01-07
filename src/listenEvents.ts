@@ -39,20 +39,21 @@ export async function listenEvents() {
     })) as EventLog[];
 
     const eventDocs: IEvent[] = [];
-
+    
     for (const event of allEvent) {
       const type = event.event.toLowerCase();
-
+      const blockInfo = await web3.eth.getBlock(event.blockNumber)
       const doc: {
         type: string;
         txId: string;
         from: string;
         coreAmount?: string;
-        sCoreAmount?: string;
+        date: Date
       } = {
         type,
         txId: event.transactionHash as string,
         from: event.address,
+        date: new Date(Number(blockInfo.timestamp) * 1000)
       };
       if ("ReInvest" === event.event) {
         const { data } = event.returnValues;
@@ -63,7 +64,7 @@ export async function listenEvents() {
         doc.coreAmount = totalAmount.toString();
         eventDocs.push(doc);
       } else if (["Stake", "WithdrawDirect", "Unbond"].includes(event.event)) {
-        const { coreAmount: eventCoreAmount, sCoreAmount } =
+        const { coreAmount: eventCoreAmount } =
           event.returnValues as {
             coreAmount: bigint;
             sCoreAmount: bigint;
@@ -85,7 +86,7 @@ export async function listenEvents() {
     } catch (error) {
       // console
     }
-    fs.writeFileSync("src/log/fromBlock", (toBlock + 1).toString());
+    fs.writeFileSync("src/log/fromBlock", (toBlock).toString());
   } catch (error) {
     log(error);
   } finally {

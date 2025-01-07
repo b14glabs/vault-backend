@@ -20,6 +20,10 @@ const schemaDefinition = {
   sCoreAmount: {
     type: String,
   },
+  date: {
+    type: Date,
+    required: true
+  }
 };
 
 const eventSchema = new mongoose.Schema(schemaDefinition, {
