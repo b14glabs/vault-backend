@@ -73,7 +73,9 @@ export async function listenEvents() {
         doc.coreAmount = eventCoreAmount.toString();
         eventDocs.push(doc);
       } else if ("Withdraw" === event.event) {
-        const { amount } = event.returnValues;
+        const { amount, user } = event.returnValues;
+        // @ts-ignore
+        doc.from = user
         doc.coreAmount = amount.toString();
         eventDocs.push(doc);
       } else if ("ClaimReward" === event.event) {
