@@ -28,7 +28,7 @@ export const getEvents = async (req: Request, res: Response) => {
       },
       page,
       limit,
-      sort: { createdAt: -1 },
+      sort: { date: -1 },
     });
     cache.set(cacheKey, data, 10);
     res.status(200).json(data);
@@ -65,7 +65,7 @@ export const getEventsByUser = async (req: Request, res: Response) => {
       },
       page,
       limit,
-      sort: { createdAt: -1 },
+      sort: { date: -1 },
     });
     cache.set(cacheKey, data, 10);
     res.status(200).json(data);
