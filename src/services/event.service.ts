@@ -26,7 +26,9 @@ export const getEventsHistory = async ({
     .skip(skip)
     .limit(limit);
 
-  const totalCount = await Event.countDocuments();
+  const totalCount = await Event.countDocuments({
+    ...query
+  });
 
   return {
     page,
