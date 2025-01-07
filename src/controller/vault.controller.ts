@@ -49,7 +49,7 @@ export const getEventsByUser = async (req: Request, res: Response) => {
     }
 
     const address = req.params.address;
-    console.log("address", address)
+    console.log("address", address);
 
     if (!Web3.utils.isAddress(address)) {
       res.status(400).json("Address is invalid");
@@ -61,7 +61,7 @@ export const getEventsByUser = async (req: Request, res: Response) => {
 
     const data = await getEventsHistory({
       query: {
-        from: address.toLowerCase()
+        from: address.toLowerCase(),
       },
       page,
       limit,
@@ -88,8 +88,8 @@ export const getClaimedReward = async (req: Request, res: Response) => {
 
     const data = await getClaimedRewardQuery();
     if (data.length) {
-      cache.set(cacheKey, data, 10);
-      res.status(200).json(data);
+      cache.set(cacheKey, { totalReward: data[0].totalReward }, 10);
+      res.status(200).json({ totalReward: data[0].totalReward });
       return;
     }
     res.status(200).json({ totalReward: 0 });
