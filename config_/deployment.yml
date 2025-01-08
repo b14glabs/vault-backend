@@ -73,11 +73,11 @@ spec:
                 secretKeyRef:
                   name: vault-be
                   key: RPC_URL
-            - name: DUAL_CORE_ADDRESS
+            - name: CORE_VAULT_ADDRESS
               valueFrom:
                 secretKeyRef:
                   name: vault-be
-                  key: DUAL_CORE_ADDRESS
+                  key: CORE_VAULT_ADDRESS
           volumeMounts:
             - mountPath: '/home/node/app/src/log'
               name: vault-be-volumes
