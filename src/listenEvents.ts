@@ -37,22 +37,21 @@ export async function listenEvents() {
       fromBlock: fromBlock,
       toBlock: toBlock,
     })) as EventLog[];
-
     const eventDocs: IEvent[] = [];
-    
+
     for (const event of allEvent) {
-      const type = event.event.toLowerCase();
-      const blockInfo = await web3.eth.getBlock(event.blockNumber)
+      const type = event.event?.toLowerCase();
+      const blockInfo = await web3.eth.getBlock(event.blockNumber);
       const doc: {
         type: string;
         txId: string;
         from?: string;
         coreAmount?: string;
-        date: Date
+        date: Date;
       } = {
         type,
         txId: event.transactionHash as string,
-        date: new Date(Number(blockInfo.timestamp) * 1000)
+        date: new Date(Number(blockInfo.timestamp) * 1000),
       };
       if ("ReInvest" === event.event) {
         const { data } = event.returnValues;
@@ -63,19 +62,18 @@ export async function listenEvents() {
         doc.coreAmount = totalAmount.toString();
         eventDocs.push(doc);
       } else if (["Stake", "WithdrawDirect", "Unbond"].includes(event.event)) {
-        const { coreAmount: eventCoreAmount, user } =
-          event.returnValues as {
-            coreAmount: bigint;
-            sCoreAmount: bigint;
-            user: string
-          };
-        doc.from = user
+        const { coreAmount: eventCoreAmount, user } = event.returnValues as {
+          coreAmount: bigint;
+          sCoreAmount: bigint;
+          user: string;
+        };
+        doc.from = user;
         doc.coreAmount = eventCoreAmount.toString();
         eventDocs.push(doc);
       } else if ("Withdraw" === event.event) {
         const { amount, user } = event.returnValues;
         // @ts-ignore
-        doc.from = user
+        doc.from = user;
         doc.coreAmount = amount.toString();
         eventDocs.push(doc);
       } else if ("ClaimReward" === event.event) {
@@ -87,9 +85,9 @@ export async function listenEvents() {
     try {
       await createEvents(eventDocs);
     } catch (error) {
-      // console
+      console.log("Insert to db eror", error);
     }
-    fs.writeFileSync("src/log/fromBlock", (toBlock).toString());
+    fs.writeFileSync("src/log/fromBlock", toBlock.toString());
   } catch (error) {
     log(error);
   } finally {
