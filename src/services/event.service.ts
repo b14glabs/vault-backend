@@ -6,7 +6,7 @@ export const createEvents = (datas: IEvent[]) => {
   });
 };
 
-export const getEventsQuery = async ({
+export const getEventsHistory = async ({
   query,
   page,
   limit,
@@ -26,7 +26,9 @@ export const getEventsQuery = async ({
     .skip(skip)
     .limit(limit);
 
-  const totalCount = await Event.countDocuments();
+  const totalCount = await Event.countDocuments({
+    ...query
+  });
 
   return {
     page,
@@ -36,3 +38,20 @@ export const getEventsQuery = async ({
     results,
   };
 };
+
+
+export const getClaimedRewardQuery = async () => {
+  return Event.aggregate([
+    {
+      $match: {
+        type: "claimreward"
+      }
+    },
+    {
+      $group: {
+        _id: null, 
+        totalReward: { $sum: { $toDouble: "$coreAmount" } }
+      }
+    }
+  ])
+}

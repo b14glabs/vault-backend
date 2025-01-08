@@ -7,7 +7,7 @@ const schemaDefinition = {
     unique: true
   },
   exchangeRate: {
-    type: Number,
+    type: String,
     required: true,
   },
   date: {

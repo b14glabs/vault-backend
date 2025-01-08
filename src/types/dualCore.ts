@@ -23,46 +23,55 @@ import type {
   TypedContractMethod,
 } from "./common";
 
-export interface DualCoreInterface extends Interface {
+export interface CoreVaultInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "acceptOwnership"
-      | "addStrategy"
-      | "exchangeRate"
-      | "getALlStrategies"
-      | "getStrategies"
-      | "getTotalStrategiesStaked"
+      | "claimReward"
+      | "dualCore"
+      | "exchangeCore"
+      | "exchangeDualCore"
       | "initialize"
-      | "isStrategy"
+      | "operator"
       | "owner"
       | "pause"
       | "paused"
       | "pendingOwner"
-      | "realtimeExchangeRate"
-      | "rebalance"
-      | "removeStrategy"
+      | "reInvest"
+      | "reInvestIndex"
       | "renounceOwnership"
-      | "sCore"
-      | "setSCore"
+      | "rewardFee"
+      | "setDualCore"
+      | "setOperator"
+      | "setRewardFee"
+      | "setStrategy"
+      | "setWithdrawFee"
       | "stake"
-      | "strategiesLength"
+      | "strategy"
+      | "totalStaked"
+      | "totalUnbondAmount"
       | "transferOwnership"
+      | "unbond"
+      | "unbondRecords"
       | "unpause"
-      | "userInfos"
       | "withdraw"
+      | "withdrawDirect"
+      | "withdrawFee"
   ): FunctionFragment;
 
   getEvent(
     nameOrSignatureOrTopic:
-      | "AddStrategy"
+      | "ClaimReward"
       | "OwnershipTransferStarted"
       | "OwnershipTransferred"
       | "Paused"
-      | "RemoveStrategy"
+      | "ReInvest"
       | "Stake"
+      | "Unbond"
       | "Unpaused"
-      | "UpdateExchangeRate"
+      | "UpdateStrategy"
       | "Withdraw"
+      | "WithdrawDirect"
   ): EventFragment;
 
   encodeFunctionData(
@@ -70,33 +79,23 @@ export interface DualCoreInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "addStrategy",
-    values: [AddressLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "exchangeRate",
+    functionFragment: "claimReward",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "dualCore", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "getALlStrategies",
-    values?: undefined
+    functionFragment: "exchangeCore",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getStrategies",
-    values: [BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getTotalStrategiesStaked",
-    values?: undefined
+    functionFragment: "exchangeDualCore",
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [AddressLike]
+    values: [AddressLike, AddressLike, BigNumberish, BigNumberish]
   ): string;
-  encodeFunctionData(
-    functionFragment: "isStrategy",
-    values: [AddressLike]
-  ): string;
+  encodeFunctionData(functionFragment: "operator", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(functionFragment: "pause", values?: undefined): string;
   encodeFunctionData(functionFragment: "paused", values?: undefined): string;
@@ -105,43 +104,69 @@ export interface DualCoreInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "realtimeExchangeRate",
+    functionFragment: "reInvest",
+    values: [BytesLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "reInvestIndex",
     values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "rebalance",
-    values: [BytesLike[][], AddressLike[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "removeStrategy",
-    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "sCore", values?: undefined): string;
+  encodeFunctionData(functionFragment: "rewardFee", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "setSCore",
+    functionFragment: "setDualCore",
     values: [AddressLike]
   ): string;
-  encodeFunctionData(functionFragment: "stake", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "strategiesLength",
+    functionFragment: "setOperator",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setRewardFee",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setStrategy",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setWithdrawFee",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "stake", values?: undefined): string;
+  encodeFunctionData(functionFragment: "strategy", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "totalStaked",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "totalUnbondAmount",
     values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [AddressLike]
   ): string;
-  encodeFunctionData(functionFragment: "unpause", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "userInfos",
-    values: [AddressLike]
+    functionFragment: "unbond",
+    values: [BigNumberish, boolean]
   ): string;
   encodeFunctionData(
-    functionFragment: "withdraw",
-    values: [BigNumberish]
+    functionFragment: "unbondRecords",
+    values: [AddressLike, BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "unpause", values?: undefined): string;
+  encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "withdrawDirect",
+    values: [BigNumberish, boolean]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "withdrawFee",
+    values?: undefined
   ): string;
 
   decodeFunctionResult(
@@ -149,27 +174,20 @@ export interface DualCoreInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "addStrategy",
+    functionFragment: "claimReward",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "dualCore", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "exchangeCore",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "exchangeRate",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getALlStrategies",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getStrategies",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getTotalStrategiesStaked",
+    functionFragment: "exchangeDualCore",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "isStrategy", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "operator", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "pause", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
@@ -177,40 +195,73 @@ export interface DualCoreInterface extends Interface {
     functionFragment: "pendingOwner",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "reInvest", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "realtimeExchangeRate",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "rebalance", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "removeStrategy",
+    functionFragment: "reInvestIndex",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "sCore", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "setSCore", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "stake", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "rewardFee", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "strategiesLength",
+    functionFragment: "setDualCore",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setOperator",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setRewardFee",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setStrategy",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setWithdrawFee",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "stake", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "strategy", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "totalStaked",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "totalUnbondAmount",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "unbond", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "unbondRecords",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "unpause", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "userInfos", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawDirect",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "withdrawFee",
+    data: BytesLike
+  ): Result;
 }
 
-export namespace AddStrategyEvent {
-  export type InputTuple = [strategy: AddressLike];
-  export type OutputTuple = [strategy: string];
+export namespace ClaimRewardEvent {
+  export type InputTuple = [reward: BigNumberish, fee: BigNumberish];
+  export type OutputTuple = [reward: bigint, fee: bigint];
   export interface OutputObject {
-    strategy: string;
+    reward: bigint;
+    fee: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -256,11 +307,11 @@ export namespace PausedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace RemoveStrategyEvent {
-  export type InputTuple = [strategy: AddressLike];
-  export type OutputTuple = [strategy: string];
+export namespace ReInvestEvent {
+  export type InputTuple = [data: BytesLike];
+  export type OutputTuple = [data: string];
   export interface OutputObject {
-    strategy: string;
+    data: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -272,17 +323,42 @@ export namespace StakeEvent {
   export type InputTuple = [
     user: AddressLike,
     coreAmount: BigNumberish,
-    sCoreAmount: BigNumberish
+    dualCoreAmount: BigNumberish
   ];
   export type OutputTuple = [
     user: string,
     coreAmount: bigint,
-    sCoreAmount: bigint
+    dualCoreAmount: bigint
   ];
   export interface OutputObject {
     user: string;
     coreAmount: bigint;
-    sCoreAmount: bigint;
+    dualCoreAmount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace UnbondEvent {
+  export type InputTuple = [
+    user: AddressLike,
+    coreAmount: BigNumberish,
+    dualCoreAmount: BigNumberish,
+    reInvestIndex: BigNumberish
+  ];
+  export type OutputTuple = [
+    user: string,
+    coreAmount: bigint,
+    dualCoreAmount: bigint,
+    reInvestIndex: bigint
+  ];
+  export interface OutputObject {
+    user: string;
+    coreAmount: bigint;
+    dualCoreAmount: bigint;
+    reInvestIndex: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -302,11 +378,11 @@ export namespace UnpausedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace UpdateExchangeRateEvent {
-  export type InputTuple = [rate: BigNumberish];
-  export type OutputTuple = [rate: bigint];
+export namespace UpdateStrategyEvent {
+  export type InputTuple = [strategy: AddressLike];
+  export type OutputTuple = [strategy: string];
   export interface OutputObject {
-    rate: bigint;
+    strategy: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -315,20 +391,11 @@ export namespace UpdateExchangeRateEvent {
 }
 
 export namespace WithdrawEvent {
-  export type InputTuple = [
-    user: AddressLike,
-    sCoreAmount: BigNumberish,
-    coreAmount: BigNumberish
-  ];
-  export type OutputTuple = [
-    user: string,
-    sCoreAmount: bigint,
-    coreAmount: bigint
-  ];
+  export type InputTuple = [user: AddressLike, amount: BigNumberish];
+  export type OutputTuple = [user: string, amount: bigint];
   export interface OutputObject {
     user: string;
-    sCoreAmount: bigint;
-    coreAmount: bigint;
+    amount: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -336,11 +403,36 @@ export namespace WithdrawEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export interface DualCore extends BaseContract {
-  connect(runner?: ContractRunner | null): DualCore;
+export namespace WithdrawDirectEvent {
+  export type InputTuple = [
+    user: AddressLike,
+    dualCoreAmount: BigNumberish,
+    coreAmount: BigNumberish,
+    fee: BigNumberish
+  ];
+  export type OutputTuple = [
+    user: string,
+    dualCoreAmount: bigint,
+    coreAmount: bigint,
+    fee: bigint
+  ];
+  export interface OutputObject {
+    user: string;
+    dualCoreAmount: bigint;
+    coreAmount: bigint;
+    fee: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export interface CoreVault extends BaseContract {
+  connect(runner?: ContractRunner | null): CoreVault;
   waitForDeployment(): Promise<this>;
 
-  interface: DualCoreInterface;
+  interface: CoreVaultInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -381,27 +473,34 @@ export interface DualCore extends BaseContract {
 
   acceptOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
-  addStrategy: TypedContractMethod<
-    [_strategy: AddressLike],
+  claimReward: TypedContractMethod<[], [bigint], "nonpayable">;
+
+  dualCore: TypedContractMethod<[], [string], "view">;
+
+  exchangeCore: TypedContractMethod<
+    [_dualCore: BigNumberish],
+    [bigint],
+    "nonpayable"
+  >;
+
+  exchangeDualCore: TypedContractMethod<
+    [core: BigNumberish],
+    [bigint],
+    "nonpayable"
+  >;
+
+  initialize: TypedContractMethod<
+    [
+      _owner: AddressLike,
+      _operator: AddressLike,
+      _withdrawFee: BigNumberish,
+      _rewardFee: BigNumberish
+    ],
     [void],
     "nonpayable"
   >;
 
-  exchangeRate: TypedContractMethod<[], [bigint], "view">;
-
-  getALlStrategies: TypedContractMethod<[], [string[]], "view">;
-
-  getStrategies: TypedContractMethod<
-    [start: BigNumberish, end: BigNumberish],
-    [string[]],
-    "view"
-  >;
-
-  getTotalStrategiesStaked: TypedContractMethod<[], [bigint], "view">;
-
-  initialize: TypedContractMethod<[_owner: AddressLike], [void], "nonpayable">;
-
-  isStrategy: TypedContractMethod<[_strategy: AddressLike], [boolean], "view">;
+  operator: TypedContractMethod<[], [string], "view">;
 
   owner: TypedContractMethod<[], [string], "view">;
 
@@ -411,29 +510,51 @@ export interface DualCore extends BaseContract {
 
   pendingOwner: TypedContractMethod<[], [string], "view">;
 
-  realtimeExchangeRate: TypedContractMethod<[], [bigint], "nonpayable">;
-
-  rebalance: TypedContractMethod<
-    [data: BytesLike[][], _strategies: AddressLike[]],
+  reInvest: TypedContractMethod<
+    [data: BytesLike, _totalUnbondAmount: BigNumberish],
     [void],
     "nonpayable"
   >;
 
-  removeStrategy: TypedContractMethod<
+  reInvestIndex: TypedContractMethod<[], [bigint], "view">;
+
+  renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
+
+  rewardFee: TypedContractMethod<[], [bigint], "view">;
+
+  setDualCore: TypedContractMethod<
+    [_dualCore: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  setOperator: TypedContractMethod<
+    [_operator: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  setRewardFee: TypedContractMethod<[_fee: BigNumberish], [void], "nonpayable">;
+
+  setStrategy: TypedContractMethod<
     [_strategy: AddressLike],
     [void],
     "nonpayable"
   >;
 
-  renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
-
-  sCore: TypedContractMethod<[], [string], "view">;
-
-  setSCore: TypedContractMethod<[_sCore: AddressLike], [void], "nonpayable">;
+  setWithdrawFee: TypedContractMethod<
+    [_fee: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
 
   stake: TypedContractMethod<[], [void], "payable">;
 
-  strategiesLength: TypedContractMethod<[], [bigint], "view">;
+  strategy: TypedContractMethod<[], [string], "view">;
+
+  totalStaked: TypedContractMethod<[], [bigint], "nonpayable">;
+
+  totalUnbondAmount: TypedContractMethod<[], [bigint], "view">;
 
   transferOwnership: TypedContractMethod<
     [newOwner: AddressLike],
@@ -441,21 +562,35 @@ export interface DualCore extends BaseContract {
     "nonpayable"
   >;
 
-  unpause: TypedContractMethod<[], [void], "nonpayable">;
+  unbond: TypedContractMethod<
+    [dualCoreAmount: BigNumberish, claim: boolean],
+    [void],
+    "payable"
+  >;
 
-  userInfos: TypedContractMethod<
-    [arg0: AddressLike],
+  unbondRecords: TypedContractMethod<
+    [arg0: AddressLike, arg1: BigNumberish],
     [
       [bigint, bigint, bigint] & {
-        balance: bigint;
-        rewardDebt: bigint;
-        accPerShare: bigint;
+        coreAmount: bigint;
+        dualCoreAmount: bigint;
+        reInvestIndex: bigint;
       }
     ],
     "view"
   >;
 
-  withdraw: TypedContractMethod<[sCoreAmount: BigNumberish], [void], "payable">;
+  unpause: TypedContractMethod<[], [void], "nonpayable">;
+
+  withdraw: TypedContractMethod<[], [void], "payable">;
+
+  withdrawDirect: TypedContractMethod<
+    [dualCoreAmount: BigNumberish, claim: boolean],
+    [void],
+    "payable"
+  >;
+
+  withdrawFee: TypedContractMethod<[], [bigint], "view">;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
@@ -465,30 +600,32 @@ export interface DualCore extends BaseContract {
     nameOrSignature: "acceptOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "addStrategy"
-  ): TypedContractMethod<[_strategy: AddressLike], [void], "nonpayable">;
+    nameOrSignature: "claimReward"
+  ): TypedContractMethod<[], [bigint], "nonpayable">;
   getFunction(
-    nameOrSignature: "exchangeRate"
-  ): TypedContractMethod<[], [bigint], "view">;
+    nameOrSignature: "dualCore"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "getALlStrategies"
-  ): TypedContractMethod<[], [string[]], "view">;
+    nameOrSignature: "exchangeCore"
+  ): TypedContractMethod<[_dualCore: BigNumberish], [bigint], "nonpayable">;
   getFunction(
-    nameOrSignature: "getStrategies"
-  ): TypedContractMethod<
-    [start: BigNumberish, end: BigNumberish],
-    [string[]],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "getTotalStrategiesStaked"
-  ): TypedContractMethod<[], [bigint], "view">;
+    nameOrSignature: "exchangeDualCore"
+  ): TypedContractMethod<[core: BigNumberish], [bigint], "nonpayable">;
   getFunction(
     nameOrSignature: "initialize"
-  ): TypedContractMethod<[_owner: AddressLike], [void], "nonpayable">;
+  ): TypedContractMethod<
+    [
+      _owner: AddressLike,
+      _operator: AddressLike,
+      _withdrawFee: BigNumberish,
+      _rewardFee: BigNumberish
+    ],
+    [void],
+    "nonpayable"
+  >;
   getFunction(
-    nameOrSignature: "isStrategy"
-  ): TypedContractMethod<[_strategy: AddressLike], [boolean], "view">;
+    nameOrSignature: "operator"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "owner"
   ): TypedContractMethod<[], [string], "view">;
@@ -502,62 +639,94 @@ export interface DualCore extends BaseContract {
     nameOrSignature: "pendingOwner"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "realtimeExchangeRate"
-  ): TypedContractMethod<[], [bigint], "nonpayable">;
-  getFunction(
-    nameOrSignature: "rebalance"
+    nameOrSignature: "reInvest"
   ): TypedContractMethod<
-    [data: BytesLike[][], _strategies: AddressLike[]],
+    [data: BytesLike, _totalUnbondAmount: BigNumberish],
     [void],
     "nonpayable"
   >;
   getFunction(
-    nameOrSignature: "removeStrategy"
-  ): TypedContractMethod<[_strategy: AddressLike], [void], "nonpayable">;
+    nameOrSignature: "reInvestIndex"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "renounceOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "sCore"
-  ): TypedContractMethod<[], [string], "view">;
+    nameOrSignature: "rewardFee"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "setSCore"
-  ): TypedContractMethod<[_sCore: AddressLike], [void], "nonpayable">;
+    nameOrSignature: "setDualCore"
+  ): TypedContractMethod<[_dualCore: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setOperator"
+  ): TypedContractMethod<[_operator: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setRewardFee"
+  ): TypedContractMethod<[_fee: BigNumberish], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setStrategy"
+  ): TypedContractMethod<[_strategy: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setWithdrawFee"
+  ): TypedContractMethod<[_fee: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "stake"
   ): TypedContractMethod<[], [void], "payable">;
   getFunction(
-    nameOrSignature: "strategiesLength"
+    nameOrSignature: "strategy"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "totalStaked"
+  ): TypedContractMethod<[], [bigint], "nonpayable">;
+  getFunction(
+    nameOrSignature: "totalUnbondAmount"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "transferOwnership"
   ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "unpause"
-  ): TypedContractMethod<[], [void], "nonpayable">;
-  getFunction(
-    nameOrSignature: "userInfos"
+    nameOrSignature: "unbond"
   ): TypedContractMethod<
-    [arg0: AddressLike],
+    [dualCoreAmount: BigNumberish, claim: boolean],
+    [void],
+    "payable"
+  >;
+  getFunction(
+    nameOrSignature: "unbondRecords"
+  ): TypedContractMethod<
+    [arg0: AddressLike, arg1: BigNumberish],
     [
       [bigint, bigint, bigint] & {
-        balance: bigint;
-        rewardDebt: bigint;
-        accPerShare: bigint;
+        coreAmount: bigint;
+        dualCoreAmount: bigint;
+        reInvestIndex: bigint;
       }
     ],
     "view"
   >;
   getFunction(
+    nameOrSignature: "unpause"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "withdraw"
-  ): TypedContractMethod<[sCoreAmount: BigNumberish], [void], "payable">;
+  ): TypedContractMethod<[], [void], "payable">;
+  getFunction(
+    nameOrSignature: "withdrawDirect"
+  ): TypedContractMethod<
+    [dualCoreAmount: BigNumberish, claim: boolean],
+    [void],
+    "payable"
+  >;
+  getFunction(
+    nameOrSignature: "withdrawFee"
+  ): TypedContractMethod<[], [bigint], "view">;
 
   getEvent(
-    key: "AddStrategy"
+    key: "ClaimReward"
   ): TypedContractEvent<
-    AddStrategyEvent.InputTuple,
-    AddStrategyEvent.OutputTuple,
-    AddStrategyEvent.OutputObject
+    ClaimRewardEvent.InputTuple,
+    ClaimRewardEvent.OutputTuple,
+    ClaimRewardEvent.OutputObject
   >;
   getEvent(
     key: "OwnershipTransferStarted"
@@ -581,11 +750,11 @@ export interface DualCore extends BaseContract {
     PausedEvent.OutputObject
   >;
   getEvent(
-    key: "RemoveStrategy"
+    key: "ReInvest"
   ): TypedContractEvent<
-    RemoveStrategyEvent.InputTuple,
-    RemoveStrategyEvent.OutputTuple,
-    RemoveStrategyEvent.OutputObject
+    ReInvestEvent.InputTuple,
+    ReInvestEvent.OutputTuple,
+    ReInvestEvent.OutputObject
   >;
   getEvent(
     key: "Stake"
@@ -595,6 +764,13 @@ export interface DualCore extends BaseContract {
     StakeEvent.OutputObject
   >;
   getEvent(
+    key: "Unbond"
+  ): TypedContractEvent<
+    UnbondEvent.InputTuple,
+    UnbondEvent.OutputTuple,
+    UnbondEvent.OutputObject
+  >;
+  getEvent(
     key: "Unpaused"
   ): TypedContractEvent<
     UnpausedEvent.InputTuple,
@@ -602,11 +778,11 @@ export interface DualCore extends BaseContract {
     UnpausedEvent.OutputObject
   >;
   getEvent(
-    key: "UpdateExchangeRate"
+    key: "UpdateStrategy"
   ): TypedContractEvent<
-    UpdateExchangeRateEvent.InputTuple,
-    UpdateExchangeRateEvent.OutputTuple,
-    UpdateExchangeRateEvent.OutputObject
+    UpdateStrategyEvent.InputTuple,
+    UpdateStrategyEvent.OutputTuple,
+    UpdateStrategyEvent.OutputObject
   >;
   getEvent(
     key: "Withdraw"
@@ -615,17 +791,24 @@ export interface DualCore extends BaseContract {
     WithdrawEvent.OutputTuple,
     WithdrawEvent.OutputObject
   >;
+  getEvent(
+    key: "WithdrawDirect"
+  ): TypedContractEvent<
+    WithdrawDirectEvent.InputTuple,
+    WithdrawDirectEvent.OutputTuple,
+    WithdrawDirectEvent.OutputObject
+  >;
 
   filters: {
-    "AddStrategy(address)": TypedContractEvent<
-      AddStrategyEvent.InputTuple,
-      AddStrategyEvent.OutputTuple,
-      AddStrategyEvent.OutputObject
+    "ClaimReward(uint256,uint256)": TypedContractEvent<
+      ClaimRewardEvent.InputTuple,
+      ClaimRewardEvent.OutputTuple,
+      ClaimRewardEvent.OutputObject
     >;
-    AddStrategy: TypedContractEvent<
-      AddStrategyEvent.InputTuple,
-      AddStrategyEvent.OutputTuple,
-      AddStrategyEvent.OutputObject
+    ClaimReward: TypedContractEvent<
+      ClaimRewardEvent.InputTuple,
+      ClaimRewardEvent.OutputTuple,
+      ClaimRewardEvent.OutputObject
     >;
 
     "OwnershipTransferStarted(address,address)": TypedContractEvent<
@@ -661,15 +844,15 @@ export interface DualCore extends BaseContract {
       PausedEvent.OutputObject
     >;
 
-    "RemoveStrategy(address)": TypedContractEvent<
-      RemoveStrategyEvent.InputTuple,
-      RemoveStrategyEvent.OutputTuple,
-      RemoveStrategyEvent.OutputObject
+    "ReInvest(bytes)": TypedContractEvent<
+      ReInvestEvent.InputTuple,
+      ReInvestEvent.OutputTuple,
+      ReInvestEvent.OutputObject
     >;
-    RemoveStrategy: TypedContractEvent<
-      RemoveStrategyEvent.InputTuple,
-      RemoveStrategyEvent.OutputTuple,
-      RemoveStrategyEvent.OutputObject
+    ReInvest: TypedContractEvent<
+      ReInvestEvent.InputTuple,
+      ReInvestEvent.OutputTuple,
+      ReInvestEvent.OutputObject
     >;
 
     "Stake(address,uint256,uint256)": TypedContractEvent<
@@ -683,6 +866,17 @@ export interface DualCore extends BaseContract {
       StakeEvent.OutputObject
     >;
 
+    "Unbond(address,uint256,uint256,uint256)": TypedContractEvent<
+      UnbondEvent.InputTuple,
+      UnbondEvent.OutputTuple,
+      UnbondEvent.OutputObject
+    >;
+    Unbond: TypedContractEvent<
+      UnbondEvent.InputTuple,
+      UnbondEvent.OutputTuple,
+      UnbondEvent.OutputObject
+    >;
+
     "Unpaused(address)": TypedContractEvent<
       UnpausedEvent.InputTuple,
       UnpausedEvent.OutputTuple,
@@ -694,18 +888,18 @@ export interface DualCore extends BaseContract {
       UnpausedEvent.OutputObject
     >;
 
-    "UpdateExchangeRate(uint256)": TypedContractEvent<
-      UpdateExchangeRateEvent.InputTuple,
-      UpdateExchangeRateEvent.OutputTuple,
-      UpdateExchangeRateEvent.OutputObject
+    "UpdateStrategy(address)": TypedContractEvent<
+      UpdateStrategyEvent.InputTuple,
+      UpdateStrategyEvent.OutputTuple,
+      UpdateStrategyEvent.OutputObject
     >;
-    UpdateExchangeRate: TypedContractEvent<
-      UpdateExchangeRateEvent.InputTuple,
-      UpdateExchangeRateEvent.OutputTuple,
-      UpdateExchangeRateEvent.OutputObject
+    UpdateStrategy: TypedContractEvent<
+      UpdateStrategyEvent.InputTuple,
+      UpdateStrategyEvent.OutputTuple,
+      UpdateStrategyEvent.OutputObject
     >;
 
-    "Withdraw(address,uint256,uint256)": TypedContractEvent<
+    "Withdraw(address,uint256)": TypedContractEvent<
       WithdrawEvent.InputTuple,
       WithdrawEvent.OutputTuple,
       WithdrawEvent.OutputObject
@@ -714,6 +908,17 @@ export interface DualCore extends BaseContract {
       WithdrawEvent.InputTuple,
       WithdrawEvent.OutputTuple,
       WithdrawEvent.OutputObject
+    >;
+
+    "WithdrawDirect(address,uint256,uint256,uint256)": TypedContractEvent<
+      WithdrawDirectEvent.InputTuple,
+      WithdrawDirectEvent.OutputTuple,
+      WithdrawDirectEvent.OutputObject
+    >;
+    WithdrawDirect: TypedContractEvent<
+      WithdrawDirectEvent.InputTuple,
+      WithdrawDirectEvent.OutputTuple,
+      WithdrawDirectEvent.OutputObject
     >;
   };
 }

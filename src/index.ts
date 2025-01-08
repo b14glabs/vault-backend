@@ -11,7 +11,7 @@ import { listenExchangeRate } from "./listenExchangeRate";
 import nodecache from "node-cache"
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3002;
 
 app.use(bodyParser.json());
 app.use(cors());
@@ -25,7 +25,9 @@ dotenv.config();
 export const cache = new nodecache()
 
 async function main() {
-  await mongoose.connect(process.env.MONGO_URL as string);
+  await mongoose.connect(process.env.MONGO_URL as string, {
+    dbName: "vault"
+  });
   app.listen(port, async () => {
     log(`[server]: Server is running at http://localhost:${port}`);
   });

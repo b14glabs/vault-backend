@@ -1,18 +1,20 @@
-import dualCoreAbi from "./abi/dual-core.json";
+import coreVaultAbi from "./abi/core-vault.json";
 import { contractAddresses, jsonRpc, RPC_URL } from "./consts";
-import { EnumType, IEvent } from "./model/event.model";
+import { IEvent } from "./model/event.model";
 import { createEvents } from "./services/event.service";
-import { DualCore } from "./types/dualCore";
+import { AbiCoder } from "ethers";
 import Web3, { EventLog } from "web3";
 import fs from "fs";
 import { log } from "console";
+
+const abiCoder = new AbiCoder();
 
 export async function listenEvents() {
   try {
     const web3 = new Web3(RPC_URL);
     const contract = new web3.eth.Contract(
-      dualCoreAbi,
-      contractAddresses.dualCore
+      coreVaultAbi,
+      contractAddresses.coreVault
     );
     const latestBlock = await web3.eth.getBlockNumber();
     let fromBlock = 0;
@@ -35,47 +37,62 @@ export async function listenEvents() {
       fromBlock: fromBlock,
       toBlock: toBlock,
     })) as EventLog[];
-
     const eventDocs: IEvent[] = [];
 
     for (const event of allEvent) {
-      if (["Rebalance", "Stake", "Withdraw"].includes(event.event)) {
-        const type = event.event.toLowerCase() as EnumType;
-        const {
-          coreAmount: eventCoreAmount,
-          sCoreAmount,
-          stakeAmounts,
-          strategies,
-          totalAmounts,
-        } = event.returnValues as {
+      const type = event.event?.toLowerCase();
+      const blockInfo = await web3.eth.getBlock(event.blockNumber);
+      const doc: {
+        type: string;
+        txId: string;
+        from?: string;
+        coreAmount?: string;
+        date: Date;
+      } = {
+        type,
+        txId: event.transactionHash as string,
+        date: new Date(Number(blockInfo.timestamp) * 1000),
+      };
+      if ("ReInvest" === event.event) {
+        const { data } = event.returnValues;
+        const totalAmount = abiCoder.decode(
+          ["bytes", "uint256"],
+          data as any
+        )[1];
+        doc.coreAmount = totalAmount.toString();
+        eventDocs.push(doc);
+      } else if (["Stake", "WithdrawDirect", "Unbond"].includes(event.event)) {
+        const { coreAmount: eventCoreAmount, user } = event.returnValues as {
           coreAmount: bigint;
           sCoreAmount: bigint;
-          strategies: string[];
-          stakeAmounts: bigint[];
-          totalAmounts: bigint[];
+          user: string;
         };
-        let coreAmount = eventCoreAmount
-          ? eventCoreAmount
-          : stakeAmounts.reduce((prev, cur) => cur + prev, BigInt(0));
-        const doc = {
-          type,
-          txId: event.transactionHash as string,
-          from: event.address,
-          coreAmount: coreAmount.toString(),
-          strategies,
-          sCoreAmount: sCoreAmount ? sCoreAmount.toString() : undefined,
-        };
+        doc.from = user;
+        doc.coreAmount = eventCoreAmount.toString();
+        eventDocs.push(doc);
+      } else if ("Withdraw" === event.event) {
+        const { amount, user } = event.returnValues;
+        // @ts-ignore
+        doc.from = user;
+        doc.coreAmount = amount.toString();
+        eventDocs.push(doc);
+      } else if ("ClaimReward" === event.event) {
+        const { reward } = event.returnValues;
+        doc.coreAmount = reward.toString();
         eventDocs.push(doc);
       }
     }
-
-    await createEvents(eventDocs);
-    fs.writeFileSync("src/log/fromBlock", (toBlock + 1).toString());
+    try {
+      await createEvents(eventDocs);
+    } catch (error) {
+      console.log("Insert to db eror", error);
+    }
+    fs.writeFileSync("src/log/fromBlock", toBlock.toString());
   } catch (error) {
     log(error);
   } finally {
     setTimeout(() => {
       listenEvents();
-    }, 1000);
+    }, 3000);
   }
 }

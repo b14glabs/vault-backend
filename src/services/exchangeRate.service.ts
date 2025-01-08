@@ -13,7 +13,10 @@ export const findDailyApy = async () => {
       $addFields: {
         day: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
         today: { $dateToString: { format: "%Y-%m-%d", date: current } },
-        sevenDayAgo: { $dateToString: { format: "%Y-%m-%d", date: sevenDaysAgo } },
+        sevenDayAgo: {
+          $dateToString: { format: "%Y-%m-%d", date: sevenDaysAgo },
+        },
+        exchangeRateNumber: { $toDouble: "$exchangeRate" },
       },
     },
     {
@@ -21,16 +24,16 @@ export const findDailyApy = async () => {
         $expr: {
           $and: [
             { $ne: ["$day", "$today"] },
-            { $gte: ["$day", "$sevenDayAgo"] }
-          ]
-        }
+            { $gte: ["$day", "$sevenDayAgo"] },
+          ],
+        },
       },
     },
     {
       $group: {
         _id: "$day",
-        maxRate: { $max: "$exchangeRate" },
-        minRate: { $min: "$exchangeRate" },
+        maxRate: { $max: "$exchangeRateNumber" },
+        minRate: { $min: "$exchangeRateNumber" },
       },
     },
     {
