@@ -21,10 +21,17 @@ export const getEvents = async (req: Request, res: Response) => {
 
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
+    const type = req.query.type as string;
+
+    const typeQuery = type
+      ? {
+          $eq: type,
+        }
+      : { $ne: "claimreward" };
 
     const data = await getEventsHistory({
       query: {
-        type: { $ne: "claimreward" },
+        type: typeQuery,
       },
       page,
       limit,
@@ -58,11 +65,19 @@ export const getEventsByUser = async (req: Request, res: Response) => {
 
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-
+    const type = req.query.type as string;
+    const query = type
+      ? {
+          from: Web3.utils.toChecksumAddress(address),
+          type: {
+            $eq: type,
+          },
+        }
+      : {
+          from: Web3.utils.toChecksumAddress(address),
+        };
     const data = await getEventsHistory({
-      query: {
-        from: Web3.utils.toChecksumAddress(address),
-      },
+      query,
       page,
       limit,
       sort: { date: -1 },
@@ -108,7 +123,6 @@ export const getDailyApy = async (req: Request, res: Response) => {
       return;
     }
     const data = await findDailyApy();
-    console.log("data", data);
     const dailyApy = data.length ? data[0].averageRatio - 1 : 0;
     cache.set(cacheKey, dailyApy, 60);
     res.status(200).json({ dailyApy });
