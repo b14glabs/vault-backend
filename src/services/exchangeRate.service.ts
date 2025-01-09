@@ -34,5 +34,10 @@ export const findDailyApy = async () => {
         minRate: { $min: "$exchangeRateNumber" },
       },
     },
+    {
+      $sort: {
+        _id: 1
+      }
+    }
   ]);
 };
