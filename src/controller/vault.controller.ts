@@ -122,8 +122,20 @@ export const getDailyApy = async (req: Request, res: Response) => {
       res.status(200).json({ dailyApy: cacheValue });
       return;
     }
-    const data = await findDailyApy();
-    const dailyApy = data.length ? data[0].averageRatio - 1 : 0;
+    const data = (await findDailyApy()) as {
+      _id: string; // 2025-01-08
+      minRate: number;
+    }[];
+    if (data.length <= 1) {
+      res.status(200).json({ dailyApy: 0 });
+      return;
+    }
+
+    let cumulative = 0;
+    for (let i = 0; i < data.length - 1; i++) {
+      cumulative += data[i + 1].minRate - data[i].minRate;
+    }
+    const dailyApy = (cumulative / (data.length - 1)) / 1e18;
     cache.set(cacheKey, dailyApy, 60);
     res.status(200).json({ dailyApy });
   } catch (error) {

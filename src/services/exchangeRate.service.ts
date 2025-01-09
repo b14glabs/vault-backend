@@ -23,7 +23,6 @@ export const findDailyApy = async () => {
       $match: {
         $expr: {
           $and: [
-            { $ne: ["$day", "$today"] },
             { $gte: ["$day", "$sevenDayAgo"] },
           ],
         },
@@ -32,32 +31,7 @@ export const findDailyApy = async () => {
     {
       $group: {
         _id: "$day",
-        maxRate: { $max: "$exchangeRateNumber" },
         minRate: { $min: "$exchangeRateNumber" },
-      },
-    },
-    {
-      $project: {
-        _id: 1,
-        ratio: {
-          $cond: {
-            if: { $eq: ["$minRate", 0] },
-            then: null,
-            else: { $divide: ["$maxRate", "$minRate"] },
-          },
-        },
-      },
-    },
-    {
-      $match: {
-        ratio: { $ne: null },
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        averageRatio: { $avg: "$ratio" },
-        // ratios: { $push: { day: "$_id", ratio: "$ratio" } }
       },
     },
   ]);
