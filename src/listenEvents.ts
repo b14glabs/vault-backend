@@ -55,11 +55,13 @@ export async function listenEvents() {
       };
       if ("ReInvest" === event.event) {
         const { data } = event.returnValues;
+        const txData = await web3.eth.getTransaction(event.transactionHash)
         const totalAmount = abiCoder.decode(
           ["bytes", "uint256"],
           data as any
         )[1];
         doc.coreAmount = totalAmount.toString();
+        doc.from = txData.from
         eventDocs.push(doc);
       } else if (["Stake", "WithdrawDirect", "Unbond"].includes(event.event)) {
         const { coreAmount: eventCoreAmount, user } = event.returnValues as {
