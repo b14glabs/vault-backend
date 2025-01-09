@@ -85,7 +85,9 @@ export async function listenEvents() {
     try {
       await createEvents(eventDocs);
     } catch (error) {
-      console.log("Insert to db eror", error);
+      if (!error.toString().includes("duplicate")) {
+        console.log("Insert to db eror", error);
+      }
     }
     fs.writeFileSync("src/log/fromBlock", toBlock.toString());
   } catch (error) {

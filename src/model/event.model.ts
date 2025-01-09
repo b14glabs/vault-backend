@@ -11,7 +11,6 @@ const schemaDefinition = {
   txId: {
     type: String,
     required: true,
-    unique: true,
   },
   coreAmount: {
     type: String,
@@ -21,14 +20,24 @@ const schemaDefinition = {
   },
   date: {
     type: Date,
-    required: true
-  }
+    required: true,
+  },
 };
 
 const eventSchema = new mongoose.Schema(schemaDefinition, {
   timestamps: { createdAt: true, updatedAt: true },
   collection: "allEvents",
 });
+
+eventSchema.index(
+  {
+    type: 1,
+    txId: 1,
+  },
+  {
+    unique: true,
+  }
+);
 
 export const Event = mongoose.model("allEvents", eventSchema);
 export type IEvent = InferSchemaType<typeof schemaDefinition>;
