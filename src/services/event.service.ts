@@ -27,7 +27,7 @@ export const getEventsHistory = async ({
     .limit(limit);
 
   const totalCount = await Event.countDocuments({
-    ...query
+    ...query,
   });
 
   return {
@@ -39,19 +39,77 @@ export const getEventsHistory = async ({
   };
 };
 
-
 export const getClaimedRewardQuery = async () => {
   return Event.aggregate([
     {
       $match: {
-        type: "claimreward"
-      }
+        type: "claimreward",
+      },
     },
     {
       $group: {
-        _id: null, 
-        totalReward: { $sum: { $toDouble: "$coreAmount" } }
-      }
-    }
-  ])
-}
+        _id: null,
+        totalReward: { $sum: { $toDouble: "$coreAmount" } },
+      },
+    },
+  ]);
+};
+
+export const getStake24hChange = async () => {
+  const current = new Date();
+  const previousDate = new Date(current.getTime() - 24 * 60 * 60 * 1000);
+  const newStaked = await Event.aggregate([
+    {
+      $match: {
+        type: "stake",
+        createdAt: {
+          $gte: previousDate,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalStaked: {
+          $sum: {
+            $toDouble: "$coreAmount",
+          },
+        },
+      },
+    },
+  ]);
+  return newStaked.length ? newStaked[0].totalStaked as number : 0;
+};
+
+export const getWithdraw24hChange = async () => {
+  const current = new Date();
+  const previousDate = new Date(current.getTime() - 24 * 60 * 60 * 1000);
+  const newStaked = await Event.aggregate([
+    {
+      $match: {
+        $or: [
+          {
+            type: "withdraw",
+          },
+          {
+            type: "withdrawdirect",
+          },
+        ],
+        createdAt: {
+          $gte: previousDate,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalWithdraw: {
+          $sum: {
+            $toDouble: "$coreAmount",
+          },
+        },
+      },
+    },
+  ]);
+  return newStaked.length ? newStaked[0].totalWithdraw as number : 0;
+};
