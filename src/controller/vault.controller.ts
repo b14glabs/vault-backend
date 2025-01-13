@@ -133,7 +133,7 @@ export const getDailyApy = async (req: Request, res: Response) => {
       res.status(200).json({ dailyApy: 0 });
       return;
     }
-    const dailyApy = (data[data.length - 1].rate / data[0].rate) ** (1/5) - 1
+    const dailyApy = (data[data.length - 1].rate / data[data.length - 2].rate) - 1
     cache.set(cacheKey, dailyApy, 60);
     res.status(200).json({ dailyApy });
   } catch (error) {
