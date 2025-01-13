@@ -4,17 +4,15 @@ export const createExchangeRates = async (data: IExchangeRate) => {
   return ExchangeRate.create(data);
 };
 
-export const findDailyApy = async () => {
-  const current = new Date();
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 100000);
-
+export const findExchangeRatesPerDay = async (day = 7) => {
+  const daysAgo = new Date(Date.now() - day * 24 * 60 * 60 * 1000);
   return ExchangeRate.aggregate([
     {
       $addFields: {
         day: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
-        today: { $dateToString: { format: "%Y-%m-%d", date: current } },
-        sevenDayAgo: {
-          $dateToString: { format: "%Y-%m-%d", date: sevenDaysAgo },
+        // today: { $dateToString: { format: "%Y-%m-%d", date: current } },
+        daysAgo: {
+          $dateToString: { format: "%Y-%m-%d", date: daysAgo },
         },
         exchangeRateNumber: { $toDouble: "$exchangeRate" },
       },
@@ -22,9 +20,7 @@ export const findDailyApy = async () => {
     {
       $match: {
         $expr: {
-          $and: [
-            { $gte: ["$day", "$sevenDayAgo"] },
-          ],
+          $gte: ["$day", "$daysAgo"]
         },
       },
     },

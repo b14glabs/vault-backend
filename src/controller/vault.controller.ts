@@ -6,7 +6,7 @@ import {
   getStake24hChange,
   getWithdraw24hChange,
 } from "../services/event.service";
-import { findDailyApy } from "../services/exchangeRate.service";
+import { findExchangeRatesPerDay } from "../services/exchangeRate.service";
 import { cache } from "..";
 import Web3 from "web3";
 import { getNotInvestAmount } from "../services/stat.service";
@@ -28,8 +28,8 @@ export const getEvents = async (req: Request, res: Response) => {
 
     const typeQuery = type
       ? {
-          $eq: type,
-        }
+        $eq: type,
+      }
       : { $ne: "claimreward" };
 
     const data = await getEventsHistory({
@@ -71,14 +71,14 @@ export const getEventsByUser = async (req: Request, res: Response) => {
     const type = req.query.type as string;
     const query = type
       ? {
-          from: Web3.utils.toChecksumAddress(address),
-          type: {
-            $eq: type,
-          },
-        }
+        from: Web3.utils.toChecksumAddress(address),
+        type: {
+          $eq: type,
+        },
+      }
       : {
-          from: Web3.utils.toChecksumAddress(address),
-        };
+        from: Web3.utils.toChecksumAddress(address),
+      };
     const data = await getEventsHistory({
       query,
       page,
@@ -125,7 +125,7 @@ export const getDailyApy = async (req: Request, res: Response) => {
       res.status(200).json({ dailyApy: cacheValue });
       return;
     }
-    const data = (await findDailyApy()) as {
+    const data = (await findExchangeRatesPerDay()) as {
       _id: string; // 2025-01-08
       rate: number;
     }[];
@@ -174,6 +174,35 @@ export const getStats = async (req: Request, res: Response) => {
     res.status(200).json({ data });
   } catch (error) {
     log("Get Stats error : " + error);
+    res.status(500).json({ error: "Something wrong!" });
+  }
+};
+
+export const getApyChart = async (req: Request, res: Response) => {
+  try {
+    const cacheKey = req.url;
+    const cacheValue = cache.get(cacheKey);
+
+    if (cacheValue) {
+      res.status(200).json({ data: cacheValue });
+      return;
+    }
+    const day = isNaN(Number(req.query.day)) ? 14 : Number(req.query.day) - 1
+
+    let data = (await findExchangeRatesPerDay(day)) as {
+      _id: string; // 2025-01-08
+      minRate: number;
+    }[];
+    data = data.map(item => {
+      return {
+        ...item,
+        date: item._id
+      }
+    })
+    cache.set(cacheKey, data, 60);
+    res.status(200).json({ data });
+  } catch (error) {
+    log("Get getDailyApy error : " + error);
     res.status(500).json({ error: "Something wrong!" });
   }
 };
