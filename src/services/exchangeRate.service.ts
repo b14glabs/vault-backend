@@ -31,7 +31,7 @@ export const findDailyApy = async () => {
     {
       $group: {
         _id: "$day",
-        minRate: { $max: "$exchangeRateNumber" },
+        rate: { $max: "$exchangeRateNumber" },
       },
     },
     {
