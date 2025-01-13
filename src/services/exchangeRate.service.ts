@@ -31,7 +31,7 @@ export const findDailyApy = async () => {
     {
       $group: {
         _id: "$day",
-        minRate: { $min: "$exchangeRateNumber" },
+        minRate: { $max: "$exchangeRateNumber" },
       },
     },
     {
@@ -41,3 +41,7 @@ export const findDailyApy = async () => {
     }
   ]);
 };
+
+export const findLastExchangeRate = async () => {
+  return ExchangeRate.findOne().sort({date: -1}).limit(1)
+}

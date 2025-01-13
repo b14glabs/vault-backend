@@ -6,13 +6,14 @@ import { createExchangeRates } from "./services/exchangeRate.service";
 import coreVaultAbi from "./abi/core-vault.json";
 
 export async function listenExchangeRate() {
-  let isSave = false;
   try {
     const current = new Date();
     const hourUtc = current.getUTCHours();
-    if (hourUtc !== 0) {
+    const minuteUtc = current.getUTCMinutes()
+    if (hourUtc !== 0 || minuteUtc > 20) {
       return;
     }
+   
     const coreVaultContract = new Contract(
       contractAddresses.coreVault,
       coreVaultAbi,
@@ -29,7 +30,6 @@ export async function listenExchangeRate() {
       date: new Date(),
       exchangeRate: exchangeRate.toString(),
     });
-    isSave = true;
   } catch (error) {
     log("listenExchangeRate error :" + error);
   } finally {
@@ -37,7 +37,7 @@ export async function listenExchangeRate() {
       () => {
         listenExchangeRate();
       },
-      isSave ? 1000 * 60 * 60 * 12 : 1000 * 60 * 7
+      1000 * 60 * 7
     );
   }
 }
