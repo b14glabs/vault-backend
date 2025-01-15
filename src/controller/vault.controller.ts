@@ -7,15 +7,15 @@ import {
   getWithdraw24hChange,
 } from "../services/event.service";
 import { findExchangeRatesPerDay } from "../services/exchangeRate.service";
-import { cache } from "..";
 import Web3 from "web3";
 import { getNotInvestAmount } from "../services/stat.service";
+import { getCache, saveCache } from "../util/cache";
 
 export const getEvents = async (req: Request, res: Response) => {
   try {
     const cacheKey = req.url;
 
-    const cacheValue = cache.get(cacheKey);
+    const cacheValue = await getCache(cacheKey);
 
     if (cacheValue) {
       res.status(200).json(cacheValue);
@@ -28,8 +28,8 @@ export const getEvents = async (req: Request, res: Response) => {
 
     const typeQuery = type
       ? {
-        $eq: type,
-      }
+          $eq: type,
+        }
       : { $ne: "claimreward" };
 
     const data = await getEventsHistory({
@@ -40,8 +40,8 @@ export const getEvents = async (req: Request, res: Response) => {
       limit,
       sort: { date: -1 },
     });
-    cache.set(cacheKey, data, 10);
     res.status(200).json(data);
+    await saveCache(cacheKey, data, 10 * 1000);
   } catch (error) {
     log("Get events error : " + error);
     res.status(500).json({ error: "Something wrong!" });
@@ -51,7 +51,7 @@ export const getEvents = async (req: Request, res: Response) => {
 export const getEventsByUser = async (req: Request, res: Response) => {
   try {
     const cacheKey = req.url;
-    const cacheValue = cache.get(cacheKey);
+    const cacheValue = await getCache(cacheKey);
 
     if (cacheValue) {
       res.status(200).json(cacheValue);
@@ -71,22 +71,22 @@ export const getEventsByUser = async (req: Request, res: Response) => {
     const type = req.query.type as string;
     const query = type
       ? {
-        from: Web3.utils.toChecksumAddress(address),
-        type: {
-          $eq: type,
-        },
-      }
+          from: Web3.utils.toChecksumAddress(address),
+          type: {
+            $eq: type,
+          },
+        }
       : {
-        from: Web3.utils.toChecksumAddress(address),
-      };
+          from: Web3.utils.toChecksumAddress(address),
+        };
     const data = await getEventsHistory({
       query,
       page,
       limit,
       sort: { date: -1 },
     });
-    cache.set(cacheKey, data, 10);
     res.status(200).json(data);
+    await saveCache(cacheKey, data, 10 * 1000);
   } catch (error) {
     log("Get user history error : " + error);
     res.status(500).json({ error: "Something wrong!" });
@@ -97,7 +97,7 @@ export const getClaimedReward = async (req: Request, res: Response) => {
   try {
     const cacheKey = req.url;
 
-    const cacheValue = cache.get(cacheKey);
+    const cacheValue = await getCache(cacheKey);
 
     if (cacheValue) {
       res.status(200).json(cacheValue);
@@ -106,7 +106,11 @@ export const getClaimedReward = async (req: Request, res: Response) => {
 
     const data = await getClaimedRewardQuery();
     if (data.length) {
-      cache.set(cacheKey, { totalReward: data[0].totalReward }, 10);
+      await saveCache(
+        cacheKey,
+        { totalReward: data[0].totalReward },
+        10 * 1000
+      );
       res.status(200).json({ totalReward: data[0].totalReward });
       return;
     }
@@ -120,7 +124,7 @@ export const getClaimedReward = async (req: Request, res: Response) => {
 export const getDailyApy = async (req: Request, res: Response) => {
   try {
     const cacheKey = req.url;
-    const cacheValue = cache.get(cacheKey);
+    const cacheValue = await getCache(cacheKey);
     if (cacheValue) {
       res.status(200).json({ dailyApy: cacheValue });
       return;
@@ -133,9 +137,10 @@ export const getDailyApy = async (req: Request, res: Response) => {
       res.status(200).json({ dailyApy: 0 });
       return;
     }
-    const dailyApy = (data[data.length - 1].rate / data[data.length - 2].rate) - 1
-    cache.set(cacheKey, dailyApy, 60);
+    const dailyApy =
+      data[data.length - 1].rate / data[data.length - 2].rate - 1;
     res.status(200).json({ dailyApy });
+    await saveCache(cacheKey, dailyApy);
   } catch (error) {
     log("Get getDailyApy error : " + error);
     res.status(500).json({ error: "Something wrong!" });
@@ -145,7 +150,7 @@ export const getDailyApy = async (req: Request, res: Response) => {
 export const getStats = async (req: Request, res: Response) => {
   try {
     const cacheKey = req.url;
-    const cacheValue = cache.get(cacheKey);
+    const cacheValue = await getCache(cacheKey);
     if (cacheValue) {
       res.status(200).json({ data: cacheValue });
       return;
@@ -170,8 +175,8 @@ export const getStats = async (req: Request, res: Response) => {
           : "0",
       core24hChange,
     };
-    cache.set(cacheKey, data, 30);
     res.status(200).json({ data });
+    await saveCache(cacheKey, data, 30 * 1000);
   } catch (error) {
     log("Get Stats error : " + error);
     res.status(500).json({ error: "Something wrong!" });
@@ -181,26 +186,26 @@ export const getStats = async (req: Request, res: Response) => {
 export const getApyChart = async (req: Request, res: Response) => {
   try {
     const cacheKey = req.url;
-    const cacheValue = cache.get(cacheKey);
+    const cacheValue = await getCache(cacheKey);
 
     if (cacheValue) {
       res.status(200).json({ data: cacheValue });
       return;
     }
-    const day = isNaN(Number(req.query.day)) ? 14 : Number(req.query.day) - 1
+    const day = isNaN(Number(req.query.day)) ? 14 : Number(req.query.day) - 1;
 
     let data = (await findExchangeRatesPerDay(day)) as {
       _id: string; // 2025-01-08
       minRate: number;
     }[];
-    data = data.map(item => {
+    data = data.map((item) => {
       return {
         ...item,
-        date: item._id
-      }
-    })
-    cache.set(cacheKey, data, 60);
+        date: item._id,
+      };
+    });
     res.status(200).json({ data });
+    await saveCache(cacheKey, data);
   } catch (error) {
     log("Get getApyChart error : " + error);
     res.status(500).json({ error: "Something wrong!" });
