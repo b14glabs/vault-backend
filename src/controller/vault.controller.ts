@@ -202,7 +202,7 @@ export const getApyChart = async (req: Request, res: Response) => {
     cache.set(cacheKey, data, 60);
     res.status(200).json({ data });
   } catch (error) {
-    log("Get getDailyApy error : " + error);
+    log("Get getApyChart error : " + error);
     res.status(500).json({ error: "Something wrong!" });
   }
 };
