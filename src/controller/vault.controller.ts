@@ -9,7 +9,7 @@ import {
 import { findExchangeRatesPerDay } from "../services/exchangeRate.service";
 import Web3 from "web3";
 import { getNotInvestAmount } from "../services/stat.service";
-import cache from "../util/cache";
+import cache, { getTomorrowDate } from "../util/cache";
 
 export const getEvents = async (req: Request, res: Response) => {
   try {
@@ -140,7 +140,8 @@ export const getDailyApy = async (req: Request, res: Response) => {
     const dailyApy =
       data[data.length - 1].rate / data[data.length - 2].rate - 1;
     res.status(200).json({ dailyApy });
-    await cache.save(cacheKey, dailyApy);
+
+    await cache.save(cacheKey, dailyApy, 60 * 5 * 1000, getTomorrowDate());
   } catch (error) {
     log("Get getDailyApy error : " + error);
     res.status(500).json({ error: "Something wrong!" });
@@ -205,7 +206,8 @@ export const getApyChart = async (req: Request, res: Response) => {
       };
     });
     res.status(200).json({ data });
-    await cache.save(cacheKey, data);
+    await cache.save(cacheKey, data, 60 * 5 * 1000, getTomorrowDate());
+
   } catch (error) {
     log("Get getApyChart error : " + error);
     res.status(500).json({ error: "Something wrong!" });
