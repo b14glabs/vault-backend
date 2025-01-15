@@ -9,13 +9,13 @@ import {
 import { findExchangeRatesPerDay } from "../services/exchangeRate.service";
 import Web3 from "web3";
 import { getNotInvestAmount } from "../services/stat.service";
-import { getCache, saveCache } from "../util/cache";
+import cache from "../util/cache";
 
 export const getEvents = async (req: Request, res: Response) => {
   try {
     const cacheKey = req.url;
 
-    const cacheValue = await getCache(cacheKey);
+    const cacheValue = await cache.get(cacheKey);
 
     if (cacheValue) {
       res.status(200).json(cacheValue);
@@ -41,7 +41,7 @@ export const getEvents = async (req: Request, res: Response) => {
       sort: { date: -1 },
     });
     res.status(200).json(data);
-    await saveCache(cacheKey, data, 10 * 1000);
+    await cache.save(cacheKey, data, 10 * 1000);
   } catch (error) {
     log("Get events error : " + error);
     res.status(500).json({ error: "Something wrong!" });
@@ -51,7 +51,7 @@ export const getEvents = async (req: Request, res: Response) => {
 export const getEventsByUser = async (req: Request, res: Response) => {
   try {
     const cacheKey = req.url;
-    const cacheValue = await getCache(cacheKey);
+    const cacheValue = await cache.get(cacheKey);
 
     if (cacheValue) {
       res.status(200).json(cacheValue);
@@ -86,7 +86,7 @@ export const getEventsByUser = async (req: Request, res: Response) => {
       sort: { date: -1 },
     });
     res.status(200).json(data);
-    await saveCache(cacheKey, data, 10 * 1000);
+    await cache.save(cacheKey, data, 10 * 1000);
   } catch (error) {
     log("Get user history error : " + error);
     res.status(500).json({ error: "Something wrong!" });
@@ -97,7 +97,7 @@ export const getClaimedReward = async (req: Request, res: Response) => {
   try {
     const cacheKey = req.url;
 
-    const cacheValue = await getCache(cacheKey);
+    const cacheValue = await cache.get(cacheKey);
 
     if (cacheValue) {
       res.status(200).json(cacheValue);
@@ -106,7 +106,7 @@ export const getClaimedReward = async (req: Request, res: Response) => {
 
     const data = await getClaimedRewardQuery();
     if (data.length) {
-      await saveCache(
+      await cache.save(
         cacheKey,
         { totalReward: data[0].totalReward },
         10 * 1000
@@ -124,7 +124,7 @@ export const getClaimedReward = async (req: Request, res: Response) => {
 export const getDailyApy = async (req: Request, res: Response) => {
   try {
     const cacheKey = req.url;
-    const cacheValue = await getCache(cacheKey);
+    const cacheValue = await cache.get(cacheKey);
     if (cacheValue) {
       res.status(200).json({ dailyApy: cacheValue });
       return;
@@ -140,7 +140,7 @@ export const getDailyApy = async (req: Request, res: Response) => {
     const dailyApy =
       data[data.length - 1].rate / data[data.length - 2].rate - 1;
     res.status(200).json({ dailyApy });
-    await saveCache(cacheKey, dailyApy);
+    await cache.save(cacheKey, dailyApy);
   } catch (error) {
     log("Get getDailyApy error : " + error);
     res.status(500).json({ error: "Something wrong!" });
@@ -150,7 +150,7 @@ export const getDailyApy = async (req: Request, res: Response) => {
 export const getStats = async (req: Request, res: Response) => {
   try {
     const cacheKey = req.url;
-    const cacheValue = await getCache(cacheKey);
+    const cacheValue = await cache.get(cacheKey);
     if (cacheValue) {
       res.status(200).json({ data: cacheValue });
       return;
@@ -176,7 +176,7 @@ export const getStats = async (req: Request, res: Response) => {
       core24hChange,
     };
     res.status(200).json({ data });
-    await saveCache(cacheKey, data, 30 * 1000);
+    await cache.save(cacheKey, data, 30 * 1000);
   } catch (error) {
     log("Get Stats error : " + error);
     res.status(500).json({ error: "Something wrong!" });
@@ -186,7 +186,7 @@ export const getStats = async (req: Request, res: Response) => {
 export const getApyChart = async (req: Request, res: Response) => {
   try {
     const cacheKey = req.url;
-    const cacheValue = await getCache(cacheKey);
+    const cacheValue = await cache.get(cacheKey);
 
     if (cacheValue) {
       res.status(200).json({ data: cacheValue });
@@ -205,7 +205,7 @@ export const getApyChart = async (req: Request, res: Response) => {
       };
     });
     res.status(200).json({ data });
-    await saveCache(cacheKey, data);
+    await cache.save(cacheKey, data);
   } catch (error) {
     log("Get getApyChart error : " + error);
     res.status(500).json({ error: "Something wrong!" });

@@ -23,7 +23,7 @@ export const ensureCacheFileExists = () => {
 };
 
 
-export const saveCache = async (key: string, value: any, ttl = 60 * 1000) => {
+const save = async (key: string, value: any, ttl = 60 * 1000) => {
   try {
     const file = await readFileSync(cachePath, "utf8");
     let data: Cache = {};
@@ -43,7 +43,7 @@ export const saveCache = async (key: string, value: any, ttl = 60 * 1000) => {
   }
 };
 
-export const getCache = async (key: string) => {
+const get = async (key: string) => {
   try {
     const file = await readFileSync(cachePath, "utf8");
     if (!file) {
@@ -61,3 +61,10 @@ export const getCache = async (key: string) => {
     return undefined;
   }
 };
+
+const cache = {
+  save,
+  get,
+};
+
+export default cache;
