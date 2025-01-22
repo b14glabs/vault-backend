@@ -163,6 +163,7 @@ export const getStats = async (req: Request, res: Response) => {
         getWithdraw24hChange(),
       ]);
 
+    console.log("notInvestAmount, stakeChange, withdrawChange", notInvestAmount, stakeChange, withdrawChange)
     const stake24hChange =
       stakeChange.status === "fulfilled" ? stakeChange.value : 0;
     const withdraw24hChange =
