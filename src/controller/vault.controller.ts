@@ -1,15 +1,28 @@
 import { Request, Response } from "express";
-import { log } from "../util";
+import Web3 from "web3";
 import {
-  getEventsHistory,
   getClaimedRewardQuery,
+  getEventsHistory,
   getStake24hChange,
   getWithdraw24hChange,
 } from "../services/event.service";
-import { findExchangeRatesPerDay } from "../services/exchangeRate.service";
-import Web3 from "web3";
+import {
+  findExchangeRatesPerDay,
+  getLatestExchangeRates,
+} from "../services/exchangeRate.service";
 import { getNotInvestAmount } from "../services/stat.service";
+import { log } from "../util";
 import cache, { getTomorrowDate } from "../util/cache";
+
+export const getLatestExchangeRate = async (req: Request, res: Response) => {
+  try {
+    const data = await getLatestExchangeRates();
+    res.status(200).json(data);
+  } catch (error) {
+    log("Get events error : " + error);
+    res.status(500).json({ error: "Something wrong!" });
+  }
+};
 
 export const getEvents = async (req: Request, res: Response) => {
   try {
@@ -163,7 +176,12 @@ export const getStats = async (req: Request, res: Response) => {
         getWithdraw24hChange(),
       ]);
 
-    console.log("notInvestAmount, stakeChange, withdrawChange", notInvestAmount, stakeChange, withdrawChange)
+    console.log(
+      "notInvestAmount, stakeChange, withdrawChange",
+      notInvestAmount,
+      stakeChange,
+      withdrawChange
+    );
     const stake24hChange =
       stakeChange.status === "fulfilled" ? stakeChange.value : 0;
     const withdraw24hChange =
@@ -208,7 +226,6 @@ export const getApyChart = async (req: Request, res: Response) => {
     });
     res.status(200).json({ data });
     await cache.save(cacheKey, data, 60 * 5 * 1000, getTomorrowDate());
-
   } catch (error) {
     log("Get getApyChart error : " + error);
     res.status(500).json({ error: "Something wrong!" });

@@ -20,7 +20,7 @@ export const findExchangeRatesPerDay = async (day = 7) => {
     {
       $match: {
         $expr: {
-          $gte: ["$day", "$daysAgo"]
+          $gte: ["$day", "$daysAgo"],
         },
       },
     },
@@ -32,12 +32,18 @@ export const findExchangeRatesPerDay = async (day = 7) => {
     },
     {
       $sort: {
-        _id: 1
-      }
-    }
+        _id: 1,
+      },
+    },
   ]);
 };
 
 export const findLastExchangeRate = async () => {
-  return ExchangeRate.findOne().sort({date: -1}).limit(1)
-}
+  return ExchangeRate.findOne().sort({ date: -1 }).limit(1);
+};
+
+export const getLatestExchangeRates = () => {
+  return ExchangeRate.find({}, { blockNumber: 1, exchangeRate: 1 })
+    .sort({ blockNumber: -1 })
+    .limit(2);
+};
