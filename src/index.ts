@@ -8,7 +8,7 @@ import cors from "cors";
 import morgan from "morgan";
 import { log } from "console";
 import { listenExchangeRate } from "./listenExchangeRate";
-import nodecache from "node-cache"
+import { ensureCacheFileExists } from "./util/cache";
 
 const app = express();
 const port = process.env.PORT || 3002;
@@ -22,7 +22,7 @@ router.use("/vault", vaultRouter);
 app.use("/restake", router);
 
 dotenv.config();
-export const cache = new nodecache()
+ensureCacheFileExists();
 
 async function main() {
   await mongoose.connect(process.env.MONGO_URL as string, {
