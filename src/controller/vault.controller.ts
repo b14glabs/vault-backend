@@ -5,6 +5,7 @@ import {
   getClaimedRewardQuery,
   getStake24hChange,
   getWithdraw24hChange,
+  countUserStakeEvent,
 } from "../services/event.service";
 import { findExchangeRatesPerDay } from "../services/exchangeRate.service";
 import { cache } from "..";
@@ -28,8 +29,8 @@ export const getEvents = async (req: Request, res: Response) => {
 
     const typeQuery = type
       ? {
-        $eq: type,
-      }
+          $eq: type,
+        }
       : { $ne: "claimreward" };
 
     const data = await getEventsHistory({
@@ -71,14 +72,14 @@ export const getEventsByUser = async (req: Request, res: Response) => {
     const type = req.query.type as string;
     const query = type
       ? {
-        from: Web3.utils.toChecksumAddress(address),
-        type: {
-          $eq: type,
-        },
-      }
+          from: Web3.utils.toChecksumAddress(address),
+          type: {
+            $eq: type,
+          },
+        }
       : {
-        from: Web3.utils.toChecksumAddress(address),
-      };
+          from: Web3.utils.toChecksumAddress(address),
+        };
     const data = await getEventsHistory({
       query,
       page,
@@ -133,7 +134,7 @@ export const getDailyApy = async (req: Request, res: Response) => {
       res.status(200).json({ dailyApy: 0 });
       return;
     }
-    const dailyApy = (data[data.length - 1].rate / data[0].rate) ** (1/5) - 1
+    const dailyApy = (data[data.length - 1].rate / data[0].rate) ** (1 / 5) - 1;
     cache.set(cacheKey, dailyApy, 60);
     res.status(200).json({ dailyApy });
   } catch (error) {
@@ -187,18 +188,18 @@ export const getApyChart = async (req: Request, res: Response) => {
       res.status(200).json({ data: cacheValue });
       return;
     }
-    const day = isNaN(Number(req.query.day)) ? 14 : Number(req.query.day) - 1
+    const day = isNaN(Number(req.query.day)) ? 14 : Number(req.query.day) - 1;
 
     let data = (await findExchangeRatesPerDay(day)) as {
       _id: string; // 2025-01-08
       minRate: number;
     }[];
-    data = data.map(item => {
+    data = data.map((item) => {
       return {
         ...item,
-        date: item._id
-      }
-    })
+        date: item._id,
+      };
+    });
     cache.set(cacheKey, data, 60);
     res.status(200).json({ data });
   } catch (error) {
@@ -206,3 +207,20 @@ export const getApyChart = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Something wrong!" });
   }
 };
+
+export const checkUserStaked = async (req: Request, res: Response) => {
+  try {
+    const delegator = req.params.delegator;
+    const stakeEvents = await countUserStakeEvent(
+      Web3.utils.toChecksumAddress(delegator)
+    );
+
+    res.status(200).json({
+      isStaked: stakeEvents > 0 ? true : false,
+      stakeEvents,
+    });
+  } catch (error) {
+    log(error);
+    res.status(500).json({ error: error.message || error });
+  }
+}; 

@@ -1,19 +1,26 @@
 import { Router } from "express";
-import { getApyChart, getClaimedReward, getDailyApy, getEvents, getEventsByUser, getStats } from "../controller/vault.controller";
+import {
+  checkUserStaked,
+  getApyChart,
+  getClaimedReward,
+  getDailyApy,
+  getEvents,
+  getEventsByUser,
+  getStats,
+} from "../controller/vault.controller";
 
+const router = Router();
 
-const router = Router()
+router.get("/history", getEvents);
+router.get("/user-history/:address", getEventsByUser);
 
+router.get("/claimed-reward", getClaimedReward);
 
-
-router.get("/history", getEvents)
-router.get("/user-history/:address", getEventsByUser)
-
-router.get("/claimed-reward", getClaimedReward)
-
-router.get("/daily-apy", getDailyApy)
-router.get("/apy-chart", getApyChart)
+router.get("/daily-apy", getDailyApy);
+router.get("/apy-chart", getApyChart);
 // Used for marketplace stats. Do not delete
-router.get("/stats", getStats)
+router.get("/stats", getStats);
+
+router.get("/check-staked/:delegator", checkUserStaked);
 
 export default router
