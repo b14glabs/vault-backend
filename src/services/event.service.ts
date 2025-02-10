@@ -113,3 +113,11 @@ export const getWithdraw24hChange = async () => {
   ]);
   return newStaked.length ? newStaked[0].totalWithdraw as number : 0;
 };
+
+export const countUserStakeEvent = async (delegator: string) => {
+  const stakeEvents = await Event.countDocuments({
+    from: delegator,
+    type: "stake",
+  });
+  return stakeEvents;
+};

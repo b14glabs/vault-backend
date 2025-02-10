@@ -5,6 +5,7 @@ import {
   getEventsHistory,
   getStake24hChange,
   getWithdraw24hChange,
+  countUserStakeEvent,
 } from "../services/event.service";
 import {
   findExchangeRatesPerDay,
@@ -231,3 +232,20 @@ export const getApyChart = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Something wrong!" });
   }
 };
+
+export const checkUserStaked = async (req: Request, res: Response) => {
+  try {
+    const delegator = req.params.delegator;
+    const stakeEvents = await countUserStakeEvent(
+      Web3.utils.toChecksumAddress(delegator)
+    );
+
+    res.status(200).json({
+      isStaked: stakeEvents > 0 ? true : false,
+      stakeEvents,
+    });
+  } catch (error) {
+    log(error);
+    res.status(500).json({ error: error.message || error });
+  }
+}; 
