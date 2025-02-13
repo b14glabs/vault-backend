@@ -6,6 +6,8 @@ import {
   getStake24hChange,
   getWithdraw24hChange,
   countUserStakeEvent,
+  insertEvent,
+  totalStakeQuery,
 } from "../services/event.service";
 import {
   findExchangeRatesPerDay,
@@ -14,6 +16,11 @@ import {
 import { getNotInvestAmount } from "../services/stat.service";
 import { log } from "../util";
 import cache, { getTomorrowDate } from "../util/cache";
+import { CORE_VAULT_ADDRESS, jsonRpc } from "../consts";
+import { ethers } from "ethers";
+import coreVaultAbi from "../abi/core-vault.json";
+import { IEvent } from "../model/event.model";
+import { readCRTSBalance } from "../helper";
 
 export const getLatestExchangeRate = async (req: Request, res: Response) => {
   try {
@@ -248,4 +255,96 @@ export const checkUserStaked = async (req: Request, res: Response) => {
     log(error);
     res.status(500).json({ error: error.message || error });
   }
-}; 
+};
+
+export const saveCoretoshiStake = async (req: Request, res: Response) => {
+  try {
+    const { txId } = req.body;
+
+    if (!txId) {
+      res.status(400).json({ error: "txId is missing" });
+      return;
+    }
+
+    const contract = new ethers.Contract(
+      CORE_VAULT_ADDRESS,
+      coreVaultAbi,
+      jsonRpc
+    );
+    const transaction = await jsonRpc.getTransactionReceipt(txId);
+
+    const crtsBalance = await readCRTSBalance(
+      transaction.from,
+      transaction.blockNumber
+    );
+    if (crtsBalance === BigInt(0)) {
+      res.status(400).json({ error: "Not from coretoshi holder" });
+      return;
+    }
+    if (transaction.to.toLowerCase() !== CORE_VAULT_ADDRESS.toLowerCase()) {
+      res.status(400).json({ error: "txId is invalid. Not tx of core vault" });
+      return;
+    }
+
+    let txData;
+    for (const log of transaction.logs) {
+      try {
+        const parsedLog = contract.interface.parseLog(log);
+        if (
+          parsedLog &&
+          ["Stake", "WithdrawDirect", "Unbond"].includes(parsedLog.name)
+        ) {
+          txData = parsedLog;
+          break;
+        }
+      } catch (error) {
+        continue;
+      }
+    }
+    if (!txData) {
+      res.status(400).json({ error: "txId is invalid" });
+      return;
+    }
+    const { name } = txData;
+
+    const blockNumber = transaction.blockNumber;
+    const block = await jsonRpc.getBlock(blockNumber);
+
+    const doc: IEvent = {
+      type: name.toLowerCase(),
+      txId: transaction.hash as string,
+      date: new Date(Number(block.timestamp) * 1000),
+      from: transaction.from,
+      coreAmount: txData.args[1].toString(),
+      dualCoreAmount: txData.args[2].toString(),
+      isFromCoretoshiVault: true,
+    };
+
+    await insertEvent(doc);
+    res.status(200).json({ status: "ok" });
+  } catch (error) {
+    log("Get events error : " + error);
+    res.status(500).json({ error: "Something wrong!" });
+  }
+};
+
+export const getDualCoreInfo = async (req: Request, res: Response) => {
+  try {
+    const cacheKey = req.url;
+    const cacheValue = await cache.get(cacheKey);
+    if (cacheValue) {
+      res.status(200).json(cacheValue);
+      return;
+    }
+    const { coretoshiTotalStake, normalTotalStake } = await totalStakeQuery();
+    const result = {
+      coretoshi: Math.max(coretoshiTotalStake, 0).toString(),
+      normal: Math.max(normalTotalStake, 0).toString(),
+    };
+    res.status(200).json(result);
+    await cache.save(cacheKey, result, 5 * 1000);
+  } catch (error) {
+    log("Get getDailyApy error : " + error);
+    res.status(500).json({ error: "Something wrong!" });
+  }
+};

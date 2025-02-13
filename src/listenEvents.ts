@@ -47,6 +47,7 @@ export async function listenEvents() {
         txId: string;
         from?: string;
         coreAmount?: string;
+        dualCoreAmount?: string;
         date: Date;
       } = {
         type,
@@ -64,12 +65,13 @@ export async function listenEvents() {
         doc.from = txData.from
         eventDocs.push(doc);
       } else if (["Stake", "WithdrawDirect", "Unbond"].includes(event.event)) {
-        const { coreAmount: eventCoreAmount, user } = event.returnValues as {
+        const { coreAmount: eventCoreAmount, user, dualCoreAmount } = event.returnValues as {
           coreAmount: bigint;
-          sCoreAmount: bigint;
+          dualCoreAmount: bigint;
           user: string;
         };
         doc.from = user;
+        doc.dualCoreAmount = dualCoreAmount.toString()
         doc.coreAmount = eventCoreAmount.toString();
         eventDocs.push(doc);
       } else if ("Withdraw" === event.event) {

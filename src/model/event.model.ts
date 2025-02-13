@@ -1,4 +1,4 @@
-import mongoose, { InferSchemaType } from "mongoose";
+import mongoose, { InferRawDocType } from "mongoose";
 
 const schemaDefinition = {
   from: {
@@ -15,13 +15,16 @@ const schemaDefinition = {
   coreAmount: {
     type: String,
   },
-  sCoreAmount: {
+  dualCoreAmount: {
     type: String,
   },
   date: {
     type: Date,
     required: true,
   },
+  isFromCoretoshiVault: {
+    type: Boolean
+  }
 };
 
 const eventSchema = new mongoose.Schema(schemaDefinition, {
@@ -40,4 +43,4 @@ eventSchema.index(
 );
 
 export const Event = mongoose.model("allEvents", eventSchema);
-export type IEvent = InferSchemaType<typeof schemaDefinition>;
+export type IEvent = InferRawDocType<typeof schemaDefinition>;

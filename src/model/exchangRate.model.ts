@@ -1,4 +1,4 @@
-import mongoose, { InferSchemaType } from "mongoose";
+import mongoose, { InferRawDocType } from "mongoose";
 
 const schemaDefinition = {
   blockNumber: {
@@ -22,4 +22,4 @@ const schema = new mongoose.Schema(schemaDefinition, {
 });
 
 export const ExchangeRate = mongoose.model("exchangeRates", schema);
-export type IExchangeRate = InferSchemaType<typeof schemaDefinition>;
+export type IExchangeRate = InferRawDocType<typeof schemaDefinition>;
