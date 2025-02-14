@@ -8,7 +8,7 @@ import {
   getEventsByUser,
   getLatestExchangeRate,
   getStats,
-  saveCoretoshiStake,
+  saveCoretoshiTx,
   getDualCoreInfo
 } from "../controller/vault.controller";
 
@@ -24,7 +24,7 @@ router.get("/apy-chart", getApyChart);
 // Used for marketplace stats. Do not delete
 router.get("/stats", getStats);
 router.get("/check-staked/:delegator", checkUserStaked);
-router.post("/save-coretoshi-tx", saveCoretoshiStake)
+router.post("/save-coretoshi-tx", saveCoretoshiTx)
 router.get("/dualCore-info", getDualCoreInfo)
 
 export default router;

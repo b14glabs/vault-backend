@@ -6,7 +6,7 @@ import {
   getStake24hChange,
   getWithdraw24hChange,
   countUserStakeEvent,
-  insertEvent,
+  updateEvent,
   totalStakeQuery,
 } from "../services/event.service";
 import {
@@ -257,7 +257,7 @@ export const checkUserStaked = async (req: Request, res: Response) => {
   }
 };
 
-export const saveCoretoshiStake = async (req: Request, res: Response) => {
+export const saveCoretoshiTx = async (req: Request, res: Response) => {
   try {
     const { txId } = req.body;
 
@@ -305,6 +305,7 @@ export const saveCoretoshiStake = async (req: Request, res: Response) => {
       res.status(400).json({ error: "txId is invalid" });
       return;
     }
+
     const { name } = txData;
 
     const blockNumber = transaction.blockNumber;
@@ -320,10 +321,10 @@ export const saveCoretoshiStake = async (req: Request, res: Response) => {
       isFromCoretoshiVault: true,
     };
 
-    await insertEvent(doc);
+    await updateEvent(doc);
     res.status(200).json({ status: "ok" });
   } catch (error) {
-    log("Get events error : " + error);
+    log("Save coretoshi tx error : " + error);
     res.status(500).json({ error: "Something wrong!" });
   }
 };
@@ -342,9 +343,9 @@ export const getDualCoreInfo = async (req: Request, res: Response) => {
       normal: Math.max(normalTotalStake, 0).toString(),
     };
     res.status(200).json(result);
-    await cache.save(cacheKey, result, 5 * 1000);
+    await cache.save(cacheKey, result, 4 * 1000);
   } catch (error) {
-    log("Get getDailyApy error : " + error);
+    log("Get dualCoreInfo error : " + error);
     res.status(500).json({ error: "Something wrong!" });
   }
 };

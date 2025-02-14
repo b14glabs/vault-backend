@@ -6,7 +6,7 @@ export const createEvents = (datas: IEvent[]) => {
   });
 };
 
-export const insertEvent = (data: IEvent) => {
+export const updateEvent = (data: IEvent) => {
   return Event.updateOne(
     {
       txId: data.txId,
@@ -218,3 +218,8 @@ export const totalStakeQuery = async () => {
     normalTotalStake: normalTotalStake.length ? normalTotalStake[0].stake : 0
   }
 };
+
+
+export const findEvent = async (query: any) => {
+  return Event.findOne(query)
+}
