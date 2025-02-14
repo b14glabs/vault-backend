@@ -6,6 +6,22 @@ export const createEvents = (datas: IEvent[]) => {
   });
 };
 
+export const updateEvent = (data: IEvent) => {
+  return Event.updateOne(
+    {
+      txId: data.txId,
+    },
+    {
+      $set: {
+        ...data,
+      },
+    },
+    {
+      upsert: true,
+    }
+  );
+};
+
 export const getEventsHistory = async ({
   query,
   page,
@@ -121,3 +137,89 @@ export const countUserStakeEvent = async (delegator: string) => {
   });
   return stakeEvents;
 };
+
+export const totalStakeQuery = async () => {
+  const coretoshiTotalStake = await Event.aggregate([
+    {
+        $match: {
+          dualCoreAmount: {
+            $exists: true
+          },
+          isFromCoretoshiVault: true
+        },
+    },
+    {
+      $group: {
+        _id: null,
+        stake: {
+          $sum: {
+            $cond: {
+              if: {
+                $eq: ["$type", "stake"],
+              },
+              then: {
+                $toDouble: "$dualCoreAmount",
+              },
+              else: {
+                $multiply: [
+                  {
+                    $toDouble: "$dualCoreAmount",
+                  },
+                  -1,
+                ],
+              },
+            },
+          },
+        },
+      },
+    },
+  ]) as unknown as { stake: number }[];
+
+  const normalTotalStake = await Event.aggregate([
+    {
+        $match: {
+          dualCoreAmount: {
+            $exists: true
+          },
+          isFromCoretoshiVault: {
+            $exists: false
+          }
+        },
+
+    },
+    {
+      $group: {
+        _id: null,
+        stake: {
+          $sum: {
+            $cond: {
+              if: {
+                $eq: ["$type", "stake"],
+              },
+              then: {
+                $toDouble: "$dualCoreAmount",
+              },
+              else: {
+                $multiply: [
+                  {
+                    $toDouble: "$dualCoreAmount",
+                  },
+                  -1,
+                ],
+              },
+            },
+          },
+        },
+      },
+    },
+  ]) as unknown as { stake: number }[];
+  return {
+    coretoshiTotalStake: coretoshiTotalStake.length ? coretoshiTotalStake[0].stake : 0,
+    normalTotalStake: normalTotalStake.length ? normalTotalStake[0].stake : 0
+  }
+};
+
+
+export const findEvent = async (query: any) => {
+  return Event.findOne(query)
+}
